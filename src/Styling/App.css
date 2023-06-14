@@ -1,0 +1,10 @@
+.card {
+  --bs-card-border-color: white;
+}
+
+.btn-primary {
+  --bs-btn-color: none;
+  --bs-btn-bg: none;
+  --bs-btn-border-color: none;
+  --bs-btn-active-bg: gray;
+}
