@@ -36,10 +36,14 @@ const FacebookPreview = ({ postText, postImages }) => {
             <p>{postText}</p>
           )}
         </div>
-        {postImages.empty ? (
+        {postImages.length === 0 ? (
           <Image src="ImagePlaceholder.png" />
         ) : (
-          <Image src={postImages[0]} />
+          <>
+            <div className="d-flex"></div>
+            <Image src={postImages[0]} />
+            <p>{postImages.length - 1}</p>
+          </>
         )}
 
         <Row className="mt-3 mx-3">

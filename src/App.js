@@ -69,7 +69,6 @@ function App() {
                 <Form.Group controlId="exampleForm.SelectCustom">
                   <Form.Label>Select an option:</Form.Label>
                   <Form.Control as="select" custom onChange={handlePostTo}>
-                    <option value="">-- Select --</option>
                     <option value="facebookpage">Facebook Page</option>
                     <option value="instagrampage">Instagram Page</option>
                   </Form.Control>
