@@ -5,7 +5,7 @@ import Placeholder from "react-bootstrap/Placeholder";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 
-const FacebookPreview = () => {
+const FacebookPreview = ({ postText, postImages }) => {
   return (
     <>
       <Card className="mt-3">
@@ -27,13 +27,21 @@ const FacebookPreview = () => {
               </p>
             </div>
           </div>
-          <Placeholder as="p" animation="wave">
-            <Placeholder size="xs" bg="secondary" xs={12} />
-            <Placeholder size="xs" bg="secondary" xs={6} />
-          </Placeholder>
+          {postText === "" ? (
+            <Placeholder as="p" animation="wave">
+              <Placeholder size="xs" bg="secondary" xs={12} />
+              <Placeholder size="xs" bg="secondary" xs={6} />
+            </Placeholder>
+          ) : (
+            <p>{postText}</p>
+          )}
         </div>
+        {postImages.empty ? (
+          <Image src="ImagePlaceholder.png" />
+        ) : (
+          <Image src={postImages[0]} />
+        )}
 
-        <Image src="ImagePlaceholder.png" />
         <Row className="mt-3 mx-3">
           <Col>
             <div className="d-flex">
@@ -41,7 +49,7 @@ const FacebookPreview = () => {
                 src="like.svg"
                 style={{ width: "20px", height: "20px" }}
               ></Image>
-              <p className="ms-2 text-body-secondary">Like</p>
+              <p className="ms-2 text-body-secondary fw-medium">Like</p>
             </div>
           </Col>
           <Col>
@@ -50,7 +58,7 @@ const FacebookPreview = () => {
                 src="comment.svg"
                 style={{ width: "20px", height: "20px" }}
               ></Image>
-              <p className="ms-2 text-body-secondary">Comment</p>
+              <p className="ms-2 text-body-secondary fw-medium">Comment</p>
             </div>
           </Col>
           <Col>
@@ -59,7 +67,7 @@ const FacebookPreview = () => {
                 src="share.svg"
                 style={{ width: "20px", height: "20px" }}
               ></Image>
-              <p className="ms-2 text-body-secondary">Share</p>
+              <p className="ms-2 text-body-secondary fw-medium">Share</p>
             </div>
           </Col>
         </Row>

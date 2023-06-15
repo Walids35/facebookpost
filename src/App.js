@@ -200,7 +200,7 @@ function App() {
         <Col sm={6}>
           <div className="py-4" style={{paddingLeft:"100px", paddingRight:"100px"}}>
             <h5>Facebook Feed preview</h5>
-            <FacebookPreview />
+            <FacebookPreview postText={postText} postImages={selectedImages}/>
           </div>
         </Col>
       </Row>
