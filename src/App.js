@@ -9,13 +9,14 @@ import ToggleButtonGroup from "react-bootstrap/ToggleButtonGroup";
 import InputGroup from "react-bootstrap/InputGroup";
 import { useState } from "react";
 import "./Styling/App.css";
+import FacebookPreview from "./Components/FacebookPreview";
 
 function App() {
   const [selectedImages, setSelectedImages] = useState([]);
   const [postTo, setPostTo] = useState("");
   const [textGeneration, setTextGeneration] = useState("");
   const [postText, setPostText] = useState("");
-  const [scheduling, setScheduling] = useState("");
+  const [scheduling, setScheduling] = useState("Publish");
 
   const handleScheduling = (e) => {
     setScheduling(e.currentTarget.value);
@@ -33,6 +34,20 @@ function App() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    //Create a Post Object
+    const newPost = {
+      postTo,
+      selectedImages,
+      postText,
+      scheduling,
+    };
+
+    console.log("New Post:",newPost);
+
+    setPostText("")
+    setPostTo("")
+    setSelectedImages([])
   };
 
   const handlePostTo = (e) => {
@@ -100,7 +115,11 @@ function App() {
                 </InputGroup>
                 <Form.Group>
                   <Form.Label>Text</Form.Label>
-                  <Form.Control as="textarea" aria-label="With textarea" />
+                  <Form.Control
+                    as="textarea"
+                    aria-label="With textarea"
+                    onChange={(e) => setPostText(e.currentTarget.value)}
+                  />
                 </Form.Group>
               </Card.Body>
             </Card>
@@ -163,9 +182,13 @@ function App() {
             {/**Call To action Card */}
             <Card className="mt-3">
               <Card.Body>
-                <div style={{display:"flex", alignItems:"flex-end"}}>
+                <div style={{ display: "flex", alignItems: "flex-end" }}>
                   <Button>Cancel</Button>
-                  <Button variant="primary" type="submit">
+                  <Button
+                    variant="primary"
+                    type="submit"
+                    onClick={handleSubmit}
+                  >
                     Submit
                   </Button>
                 </div>
@@ -174,7 +197,12 @@ function App() {
           </Form>
         </Col>
         {/**Right Column */}
-        <Col sm={6}>tset</Col>
+        <Col sm={6}>
+          <div className="py-4" style={{paddingLeft:"100px", paddingRight:"100px"}}>
+            <h5>Facebook Feed preview</h5>
+            <FacebookPreview />
+          </div>
+        </Col>
       </Row>
     </div>
   );
