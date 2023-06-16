@@ -17,6 +17,34 @@ function App() {
   const [textGeneration, setTextGeneration] = useState("");
   const [postText, setPostText] = useState("");
   const [scheduling, setScheduling] = useState("Publish");
+  const [scheduleTime, setScheduleTime] = useState("");
+  const [scheduleDate, setScheduleDate] = useState("");
+  const ACCESS_TOKEN = "EAADtpk8ZCkPEBAJ399KLVGsDHGjOZAQZB4HZB9qZCrViB5rQlh0uFweXtBN6HpcP2cJuuRQdfkzb5ZBUd3mqiSZCIWAFJZBHSd011QprK46bXZAEwGyn8XpiHodk8vDZCPP8XE0ttNrEH05P2ZAFKoGk1cjob1W4QzCZAYQefVM4ZChyNb4U24cIjIAnTpBo6YYBYl6udrtyh0xVh6TyMORbZBeSDi";
+  const PAGE_ID = "109960688796992";
+  const URL_ENDPOINT = `https://graph.facebook.com/${PAGE_ID}/photos`;
+  const imageUrl = "https://scontent.ftun9-1.fna.fbcdn.net/v/t39.30808-6/353673556_102602579545760_1932371616570846199_n.jpg?stp=cp0_dst-jpg&_nc_cat=100&cb=99be929b-59f725be&ccb=1-7&_nc_sid=730e14&_nc_ohc=rOEPW8pLbeAAX-YzNxg&_nc_ht=scontent.ftun9-1.fna&oh=00_AfB_3eKaAjtjfxoKqgpxOVRSIQYwauAkQpW7AyY23YjtuQ&oe=64912058";
+
+  async function submitPost(pageAccessToken, message, photoUrl) {
+    try {
+      const response = await fetch(URL_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url: photoUrl,
+          caption: message,
+          access_token: pageAccessToken,
+        }),
+      });
+
+      const responseData = await response.json();
+      console.log(responseData);
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const handleScheduling = (e) => {
     setScheduling(e.currentTarget.value);
@@ -43,11 +71,14 @@ function App() {
       scheduling,
     };
 
-    console.log("New Post:",newPost);
+    submitPost(ACCESS_TOKEN, newPost.postText, imageUrl)
 
-    setPostText("")
-    setPostTo("")
-    setSelectedImages([])
+    if (scheduling === "Schedule") {
+      newPost.scheduleDate = scheduleDate;
+      newPost.scheduleTime = scheduleTime;
+    }
+
+    console.log("New Post:", newPost);
   };
 
   const handlePostTo = (e) => {
@@ -68,7 +99,7 @@ function App() {
                 <Card.Title>Post To</Card.Title>
                 <Form.Group controlId="exampleForm.SelectCustom">
                   <Form.Label>Select an option:</Form.Label>
-                  <Form.Control as="select" custom onChange={handlePostTo}>
+                  <Form.Control as="select" onChange={handlePostTo} value={postTo} defaultValue="facebookpage">
                     <option value="facebookpage">Facebook Page</option>
                     <option value="instagrampage">Instagram Page</option>
                   </Form.Control>
@@ -116,6 +147,7 @@ function App() {
                   <Form.Label>Text</Form.Label>
                   <Form.Control
                     as="textarea"
+                    required
                     aria-label="With textarea"
                     onChange={(e) => setPostText(e.currentTarget.value)}
                   />
@@ -170,8 +202,17 @@ function App() {
                         <Form.Control
                           aria-label="Date"
                           placeholder="DD/MM/YYYY"
+                          onChange={(e) =>
+                            setScheduleDate(e.currentTarget.value)
+                          }
                         />
-                        <Form.Control aria-label="Time" placeholder="00:00" />
+                        <Form.Control
+                          aria-label="Time"
+                          placeholder="00:00"
+                          onChange={(e) =>
+                            setScheduleTime(e.currentTarget.value)
+                          }
+                        />
                       </InputGroup>
                     </div>
                   </>
@@ -197,9 +238,12 @@ function App() {
         </Col>
         {/**Right Column */}
         <Col sm={6}>
-          <div className="py-4" style={{paddingLeft:"100px", paddingRight:"100px"}}>
+          <div
+            className="py-4"
+            style={{ paddingLeft: "100px", paddingRight: "100px" }}
+          >
             <h5>Facebook Feed preview</h5>
-            <FacebookPreview postText={postText} postImages={selectedImages}/>
+            <FacebookPreview postText={postText} postImages={selectedImages} />
           </div>
         </Col>
       </Row>
