@@ -24,7 +24,7 @@ function App() {
   const ACCESS_TOKEN = "EAADtpk8ZCkPEBABepw79Ex5sHAW6LFZAST8M1cjxRN4VWJn89Whr1yKnNcokGq1Y38yZBJpUtdLbavy5uT823hpjww8BbfGGbPf5hG5JU0oQLm1ySZCoCpVWZBDPKiTBMCQkI0aze1mEBZBdxpVJskWUrH07Vz4ZAuhprWO2eYsrGF23ifMBbXTbrTSqnvZBiYOcrhS4DHc5Nkq87Y0faNBf";
   const PAGE_ID = "109960688796992";
   const URL_ENDPOINT = `https://graph.facebook.com/${PAGE_ID}/photos`;
-  const SCHEDULE_ENDPOINT = `https://graph.facebook.com/${PAGE_ID}/photos/feed`;
+  const SCHEDULE_ENDPOINT = `https://graph.facebook.com/${PAGE_ID}/feed`;
 
   async function submitSchedulePost(pageAccessToken, message, photoUrl, timeStamp){
     try{
