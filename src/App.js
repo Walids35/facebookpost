@@ -156,7 +156,7 @@ function App() {
       const date = newPost.scheduleDate + " " + newPost.scheduleTime
       const timestamp = convertToTimestamp(date)
       newPost.timeStamp = timestamp
-      submitPublishPost(ACCESS_TOKEN, newPost.postText, selectedImages[0], "1687176458")
+      submitPublishPost(ACCESS_TOKEN, newPost.postText, selectedImages[0], timestamp)
     }
 
     console.log("New Post:", newPost);
@@ -172,7 +172,7 @@ function App() {
     var hours = parseInt(timeParts[0], 10);
     var minutes = parseInt(timeParts[1], 10);
     var dateObj = new Date(year, month, day, hours, minutes);
-    return dateObj.getTime();
+    return dateObj.getTime()/1000;
   }
 
   const handlePostTo = (e) => {
@@ -235,7 +235,7 @@ function App() {
                 <InputGroup className="mb-3">
                   <Form.Control
                     placeholder="Generate Text"
-                    onClick={(e) => setTextGeneration(e.currentTarget.value)}
+                    onChange={(e) => setTextGeneration(e.currentTarget.value)}
                     aria-label="Generate Text"
                     value={textGeneration}
                     aria-describedby="basic-addon2"
