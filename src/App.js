@@ -14,6 +14,7 @@ import FacebookPreview from "./Components/FacebookPreview";
 function App() {
   const [selectedImages, setSelectedImages] = useState([]);
   const [postTo, setPostTo] = useState("");
+  const [imageurl, setImage] = useState("")
   const [textGeneration, setTextGeneration] = useState("");
   const [postText, setPostText] = useState("");
   const [scheduling, setScheduling] = useState("Publish");
@@ -45,6 +46,52 @@ function App() {
       console.log(error);
     }
   }
+
+
+  function generatetext(){
+    try{
+    fetch('https://api.openai.com/v1/chat/completions',{
+    method:'POST',
+    headers:{
+      "Content-Type": "application/json",
+      "Authorization":  "Bearer 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"
+    },
+    body: JSON.stringify({
+
+        "model": "gpt-3.5-turbo",
+        "messages": [{"role": "user", "content": input1.value}]
+
+    })}).then (res =>{
+    return (res.json())
+  }).then ( data => {
+    console.log(data.choices[0].message.content)
+  })
+}
+catch(err) {
+  console.log(err)
+}
+
+function generateimage(){
+  fetch('https://api.openai.com/v1/images/generations',{
+    method:"POST",
+    headers:{
+      "Content-Type": "application/json",
+      "Authorization": "Bearer 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"
+    },
+    body:JSON.stringify({
+       "prompt": input2.value,
+        "n": 1,
+        "size": "1024x1024"
+    })
+  }).then(res => {
+    return res.json()
+  }).then (data => {
+    
+    console.log(data.data[0].url)
+  })
+}
+  }
+
 
   const handleScheduling = (e) => {
     setScheduling(e.currentTarget.value);
@@ -137,7 +184,7 @@ function App() {
                   <Form.Control
                     placeholder="Generate Text and Image"
                     aria-label="Generate Text and Image"
-                    aria-describedby="basic-addon2"
+                    aria-describedby="basic-addon2" 
                   />
                   <Button variant="outline-secondary" id="button-addon2">
                     Generate
