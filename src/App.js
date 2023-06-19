@@ -21,7 +21,7 @@ function App() {
   const [scheduling, setScheduling] = useState("Publish");
   const [scheduleTime, setScheduleTime] = useState("");
   const [scheduleDate, setScheduleDate] = useState("");
-  const ACCESS_TOKEN = "EAADtpk8ZCkPEBAPxZAqVZAZBpdHxk0HU3DQZCZBovAGA5tu51PNSqKunMxYwREfzrUbU3s84v6iwty4SKINFWGhgx2nlVBFqq7k02pFJjZCxhqZCPKK4I5J77YSNkWZA1NlhNAZCmWHUgBN7nKvpuARJGS5BRuRcQDkRrzswlGzCbPSf915WUZBVWdL473KzpP3vT6p5yHRUcJslecXBHL20esw";
+  const ACCESS_TOKEN = "EAADtpk8ZCkPEBABepw79Ex5sHAW6LFZAST8M1cjxRN4VWJn89Whr1yKnNcokGq1Y38yZBJpUtdLbavy5uT823hpjww8BbfGGbPf5hG5JU0oQLm1ySZCoCpVWZBDPKiTBMCQkI0aze1mEBZBdxpVJskWUrH07Vz4ZAuhprWO2eYsrGF23ifMBbXTbrTSqnvZBiYOcrhS4DHc5Nkq87Y0faNBf";
   const PAGE_ID = "109960688796992";
   const URL_ENDPOINT = `https://graph.facebook.com/${PAGE_ID}/photos`;
   const SCHEDULE_ENDPOINT = `https://graph.facebook.com/${PAGE_ID}/photos/feed`;
@@ -156,7 +156,7 @@ function App() {
       const date = newPost.scheduleDate + " " + newPost.scheduleTime
       const timestamp = convertToTimestamp(date)
       newPost.timeStamp = timestamp
-      submitPublishPost(ACCESS_TOKEN, newPost.postText, selectedImages[0], timestamp)
+      submitSchedulePost(ACCESS_TOKEN, newPost.postText, selectedImages[0], timestamp)
     }
 
     console.log("New Post:", newPost);
