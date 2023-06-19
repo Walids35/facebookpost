@@ -21,14 +21,36 @@ function App() {
   const [scheduling, setScheduling] = useState("Publish");
   const [scheduleTime, setScheduleTime] = useState("");
   const [scheduleDate, setScheduleDate] = useState("");
-  const ACCESS_TOKEN =
-    "EAADtpk8ZCkPEBAJ399KLVGsDHGjOZAQZB4HZB9qZCrViB5rQlh0uFweXtBN6HpcP2cJuuRQdfkzb5ZBUd3mqiSZCIWAFJZBHSd011QprK46bXZAEwGyn8XpiHodk8vDZCPP8XE0ttNrEH05P2ZAFKoGk1cjob1W4QzCZAYQefVM4ZChyNb4U24cIjIAnTpBo6YYBYl6udrtyh0xVh6TyMORbZBeSDi";
+  const ACCESS_TOKEN = "EAADtpk8ZCkPEBAPxZAqVZAZBpdHxk0HU3DQZCZBovAGA5tu51PNSqKunMxYwREfzrUbU3s84v6iwty4SKINFWGhgx2nlVBFqq7k02pFJjZCxhqZCPKK4I5J77YSNkWZA1NlhNAZCmWHUgBN7nKvpuARJGS5BRuRcQDkRrzswlGzCbPSf915WUZBVWdL473KzpP3vT6p5yHRUcJslecXBHL20esw";
   const PAGE_ID = "109960688796992";
   const URL_ENDPOINT = `https://graph.facebook.com/${PAGE_ID}/photos`;
-  const imageUrl =
-    "https://scontent.ftun9-1.fna.fbcdn.net/v/t39.30808-6/353673556_102602579545760_1932371616570846199_n.jpg?stp=cp0_dst-jpg&_nc_cat=100&cb=99be929b-59f725be&ccb=1-7&_nc_sid=730e14&_nc_ohc=rOEPW8pLbeAAX-YzNxg&_nc_ht=scontent.ftun9-1.fna&oh=00_AfB_3eKaAjtjfxoKqgpxOVRSIQYwauAkQpW7AyY23YjtuQ&oe=64912058";
+  const SCHEDULE_ENDPOINT = `https://graph.facebook.com/${PAGE_ID}/photos/feed`;
 
-  async function submitPost(pageAccessToken, message, photoUrl) {
+  async function submitSchedulePost(pageAccessToken, message, photoUrl, timeStamp){
+    try{
+      const response = await fetch (SCHEDULE_ENDPOINT, {
+        method:"POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url: photoUrl,
+          access_token: pageAccessToken,
+          message: message,
+          published: false,
+          scheduled_publish_time: timeStamp
+        }),
+      });
+
+      const reponseData = await response.json();
+      console.log(reponseData);
+    }catch(error){
+      console.log(error)
+    }
+  } 
+
+
+  async function submitPublishPost(pageAccessToken, message, photoUrl) {
     try {
       const response = await fetch(URL_ENDPOINT, {
         method: "POST",
@@ -68,34 +90,36 @@ function App() {
         })
         .then((data) => {
           console.log(data.choices[0].message.content);
-          setTextGeneration("")
-          setPostText(data.choices[0].message.content)
+          setPostText(data.choices[0].message.content);
+          setTextGeneration("");
         });
     } catch (err) {
       console.log(err);
     }
+  }
 
-    function generateimage() {
-      fetch("https://api.openai.com/v1/images/generations", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization:
-            "Bearer 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",
-        },
-        body: JSON.stringify({
-          prompt: imageGeneration,
-          n: 1,
-          size: "1024x1024",
-        }),
+  function generateimage() {
+    fetch("https://api.openai.com/v1/images/generations", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization:
+          "Bearer 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",
+      },
+      body: JSON.stringify({
+        prompt: imageGeneration,
+        n: 1,
+        size: "1024x1024",
+      }),
+    })
+      .then((res) => {
+        return res.json();
       })
-        .then((res) => {
-          return res.json();
-        })
-        .then((data) => {
-          console.log(data.data[0].url);
-        });
-    }
+      .then((data) => {
+        console.log(data.data[0].url);
+        setSelectedImages([...selectedImages, data.data[0].url])
+        setImageGeneration("")
+      });
   }
 
   const handleScheduling = (e) => {
@@ -123,15 +147,33 @@ function App() {
       scheduling,
     };
 
-    submitPost(ACCESS_TOKEN, newPost.postText, imageUrl);
-
+    if(scheduling === "Publish"){
+      submitPublishPost(ACCESS_TOKEN, newPost.postText, selectedImages[0]);
+    }
     if (scheduling === "Schedule") {
       newPost.scheduleDate = scheduleDate;
       newPost.scheduleTime = scheduleTime;
+      const date = newPost.scheduleDate + " " + newPost.scheduleTime
+      const timestamp = convertToTimestamp(date)
+      newPost.timeStamp = timestamp
+      submitPublishPost(ACCESS_TOKEN, newPost.postText, selectedImages[0], "1687176458")
     }
 
     console.log("New Post:", newPost);
   };
+
+  function convertToTimestamp(dateString) {
+    var parts = dateString.split(' ');
+    var dateParts = parts[0].split('/');
+    var day = parseInt(dateParts[0], 10);
+    var month = parseInt(dateParts[1], 10) - 1;
+    var year = parseInt(dateParts[2], 10);
+    var timeParts = parts[1].split(':');
+    var hours = parseInt(timeParts[0], 10);
+    var minutes = parseInt(timeParts[1], 10);
+    var dateObj = new Date(year, month, day, hours, minutes);
+    return dateObj.getTime();
+  }
 
   const handlePostTo = (e) => {
     setPostTo(e.currentTarget.value);
@@ -195,20 +237,30 @@ function App() {
                     placeholder="Generate Text"
                     onClick={(e) => setTextGeneration(e.currentTarget.value)}
                     aria-label="Generate Text"
+                    value={textGeneration}
                     aria-describedby="basic-addon2"
                   />
-                  <Button variant="outline-secondary" id="button-addon2" onClick={generatetext}>
+                  <Button
+                    variant="outline-secondary"
+                    id="button-addon2"
+                    onClick={generatetext}
+                  >
                     Generate
                   </Button>
                 </InputGroup>
                 <InputGroup className="mb-3">
                   <Form.Control
                     placeholder="Generate Image"
-                    onClick={(e) => setImageGeneration(e.currentTarget.value)}
+                    onChange={(e) => setImageGeneration(e.currentTarget.value)}
+                    value={imageGeneration}
                     aria-label="Generate Image"
                     aria-describedby="basic-addon2"
                   />
-                  <Button variant="outline-secondary" id="button-addon2">
+                  <Button
+                    variant="outline-secondary"
+                    id="button-addon2"
+                    onClick={generateimage}
+                  >
                     Generate
                   </Button>
                 </InputGroup>
