@@ -14,16 +14,19 @@ import FacebookPreview from "./Components/FacebookPreview";
 function App() {
   const [selectedImages, setSelectedImages] = useState([]);
   const [postTo, setPostTo] = useState("");
-  const [imageurl, setImage] = useState("")
+  const [imageurl, setImage] = useState("");
   const [textGeneration, setTextGeneration] = useState("");
+  const [imageGeneration, setImageGeneration] = useState("");
   const [postText, setPostText] = useState("");
   const [scheduling, setScheduling] = useState("Publish");
   const [scheduleTime, setScheduleTime] = useState("");
   const [scheduleDate, setScheduleDate] = useState("");
-  const ACCESS_TOKEN = "EAADtpk8ZCkPEBAJ399KLVGsDHGjOZAQZB4HZB9qZCrViB5rQlh0uFweXtBN6HpcP2cJuuRQdfkzb5ZBUd3mqiSZCIWAFJZBHSd011QprK46bXZAEwGyn8XpiHodk8vDZCPP8XE0ttNrEH05P2ZAFKoGk1cjob1W4QzCZAYQefVM4ZChyNb4U24cIjIAnTpBo6YYBYl6udrtyh0xVh6TyMORbZBeSDi";
+  const ACCESS_TOKEN =
+    "EAADtpk8ZCkPEBAJ399KLVGsDHGjOZAQZB4HZB9qZCrViB5rQlh0uFweXtBN6HpcP2cJuuRQdfkzb5ZBUd3mqiSZCIWAFJZBHSd011QprK46bXZAEwGyn8XpiHodk8vDZCPP8XE0ttNrEH05P2ZAFKoGk1cjob1W4QzCZAYQefVM4ZChyNb4U24cIjIAnTpBo6YYBYl6udrtyh0xVh6TyMORbZBeSDi";
   const PAGE_ID = "109960688796992";
   const URL_ENDPOINT = `https://graph.facebook.com/${PAGE_ID}/photos`;
-  const imageUrl = "https://scontent.ftun9-1.fna.fbcdn.net/v/t39.30808-6/353673556_102602579545760_1932371616570846199_n.jpg?stp=cp0_dst-jpg&_nc_cat=100&cb=99be929b-59f725be&ccb=1-7&_nc_sid=730e14&_nc_ohc=rOEPW8pLbeAAX-YzNxg&_nc_ht=scontent.ftun9-1.fna&oh=00_AfB_3eKaAjtjfxoKqgpxOVRSIQYwauAkQpW7AyY23YjtuQ&oe=64912058";
+  const imageUrl =
+    "https://scontent.ftun9-1.fna.fbcdn.net/v/t39.30808-6/353673556_102602579545760_1932371616570846199_n.jpg?stp=cp0_dst-jpg&_nc_cat=100&cb=99be929b-59f725be&ccb=1-7&_nc_sid=730e14&_nc_ohc=rOEPW8pLbeAAX-YzNxg&_nc_ht=scontent.ftun9-1.fna&oh=00_AfB_3eKaAjtjfxoKqgpxOVRSIQYwauAkQpW7AyY23YjtuQ&oe=64912058";
 
   async function submitPost(pageAccessToken, message, photoUrl) {
     try {
@@ -41,57 +44,59 @@ function App() {
 
       const responseData = await response.json();
       console.log(responseData);
-
     } catch (error) {
       console.log(error);
     }
   }
 
+  function generatetext() {
+    try {
+      fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization:
+            "Bearer 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",
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: textGeneration }],
+        }),
+      })
+        .then((res) => {
+          return res.json();
+        })
+        .then((data) => {
+          console.log(data.choices[0].message.content);
+          setTextGeneration("")
+          setPostText(data.choices[0].message.content)
+        });
+    } catch (err) {
+      console.log(err);
+    }
 
-  function generatetext(){
-    try{
-    fetch('https://api.openai.com/v1/chat/completions',{
-    method:'POST',
-    headers:{
-      "Content-Type": "application/json",
-      "Authorization":  "Bearer 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"
-    },
-    body: JSON.stringify({
-
-        "model": "gpt-3.5-turbo",
-        "messages": [{"role": "user", "content": input1.value}]
-
-    })}).then (res =>{
-    return (res.json())
-  }).then ( data => {
-    console.log(data.choices[0].message.content)
-  })
-}
-catch(err) {
-  console.log(err)
-}
-
-function generateimage(){
-  fetch('https://api.openai.com/v1/images/generations',{
-    method:"POST",
-    headers:{
-      "Content-Type": "application/json",
-      "Authorization": "Bearer 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"
-    },
-    body:JSON.stringify({
-       "prompt": input2.value,
-        "n": 1,
-        "size": "1024x1024"
-    })
-  }).then(res => {
-    return res.json()
-  }).then (data => {
-    
-    console.log(data.data[0].url)
-  })
-}
+    function generateimage() {
+      fetch("https://api.openai.com/v1/images/generations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization:
+            "Bearer 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",
+        },
+        body: JSON.stringify({
+          prompt: imageGeneration,
+          n: 1,
+          size: "1024x1024",
+        }),
+      })
+        .then((res) => {
+          return res.json();
+        })
+        .then((data) => {
+          console.log(data.data[0].url);
+        });
+    }
   }
-
 
   const handleScheduling = (e) => {
     setScheduling(e.currentTarget.value);
@@ -118,7 +123,7 @@ function generateimage(){
       scheduling,
     };
 
-    submitPost(ACCESS_TOKEN, newPost.postText, imageUrl)
+    submitPost(ACCESS_TOKEN, newPost.postText, imageUrl);
 
     if (scheduling === "Schedule") {
       newPost.scheduleDate = scheduleDate;
@@ -146,7 +151,12 @@ function generateimage(){
                 <Card.Title>Post To</Card.Title>
                 <Form.Group controlId="exampleForm.SelectCustom">
                   <Form.Label>Select an option:</Form.Label>
-                  <Form.Control as="select" onChange={handlePostTo} value={postTo} defaultValue="facebookpage">
+                  <Form.Control
+                    as="select"
+                    onChange={handlePostTo}
+                    value={postTo}
+                    defaultValue="facebookpage"
+                  >
                     <option value="facebookpage">Facebook Page</option>
                     <option value="instagrampage">Instagram Page</option>
                   </Form.Control>
@@ -182,9 +192,21 @@ function generateimage(){
                 <Card.Title>Post Details</Card.Title>
                 <InputGroup className="mb-3">
                   <Form.Control
-                    placeholder="Generate Text and Image"
-                    aria-label="Generate Text and Image"
-                    aria-describedby="basic-addon2" 
+                    placeholder="Generate Text"
+                    onClick={(e) => setTextGeneration(e.currentTarget.value)}
+                    aria-label="Generate Text"
+                    aria-describedby="basic-addon2"
+                  />
+                  <Button variant="outline-secondary" id="button-addon2" onClick={generatetext}>
+                    Generate
+                  </Button>
+                </InputGroup>
+                <InputGroup className="mb-3">
+                  <Form.Control
+                    placeholder="Generate Image"
+                    onClick={(e) => setImageGeneration(e.currentTarget.value)}
+                    aria-label="Generate Image"
+                    aria-describedby="basic-addon2"
                   />
                   <Button variant="outline-secondary" id="button-addon2">
                     Generate
@@ -194,6 +216,7 @@ function generateimage(){
                   <Form.Label>Text</Form.Label>
                   <Form.Control
                     as="textarea"
+                    value={postText}
                     required
                     aria-label="With textarea"
                     onChange={(e) => setPostText(e.currentTarget.value)}
