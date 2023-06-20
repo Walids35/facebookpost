@@ -14,25 +14,18 @@ import axios from "axios";
 
 function App() {
   const [selectedImages, setSelectedImages] = useState([]);
-  const [postTo, setPostTo] = useState("");
+  const [postTo, setPostTo] = useState("facebookpost");
   const [textGeneration, setTextGeneration] = useState("");
   const [imageGeneration, setImageGeneration] = useState("");
   const [postText, setPostText] = useState("");
   const [scheduling, setScheduling] = useState("Publish");
   const [scheduleTime, setScheduleTime] = useState("");
   const [scheduleDate, setScheduleDate] = useState("");
-  const ACCESS_TOKEN =
-    "EAADtpk8ZCkPEBAMzfLnZC5KAQNRAw8KXJ0mF80tKWb5UT0COrII45e6OG1G8mptZA2e0DrSxKSvxbYBmRJ5YvDj1FZCxtMmiDos0QZCNvIEZCms9sKJtSYIricFrLbC4qTb8EGeGda2tZBskrOyFHnZCiPiU8UikG6RjUmHHddtAFL19xA7lZCQdrXyXBT3Cx3aoy0jZAWZCi8mnyW1ZBvx4LLSz";
+  const ACCESS_TOKEN = "EAADtpk8ZCkPEBAAM441FQKloVE2ASPCqTzuNkO6taAsNGf4qwXmevYpyNd3ZCG9g4X56a2MFvPi9nKoMdDqiAmCZC3NdELARdZC0ZCbZCWTZArXE4nIX2aT3QGhQuloaJNlXVFPsgDlp50vXwTZCBb2MoLEtQXiLyqRlEOeYnAF3D1cGF872MYEnTl2ijH1L7V6ebQqgZCf8xSoZCgcHxOqqe7";
   const PAGE_ID = "109960688796992";
-  const URL_ENDPOINT = `https://graph.facebook.com/${PAGE_ID}/photos`;
 
-  async function schedulePost(message, pictureUrls, scheduledTime) {
-    // Step 1: Get the Page Access Token
-    const pageAccessToken =
-      "EAADtpk8ZCkPEBAB2djh2xadRjsFHiMYjNtuWLm4HzTaz6elRRPxw2bZAvXmhRvJtQgTZBaTjUQqMIwoYfuC74YZBwugtOvcWVA1TZAFi4gW0Gb40ZCVzrDjRfmHioUz9PZCW1IgjI9wGP2ZArJZBk6zacgeibTEQ4QMPhsDtkDtLI7rmiRjNx0xU7TEgaC7kQZCDf0nJ5hpZAXc5VW5OhaHuQlY";
-
-    // Step 2: Prepare the request URL
-    const apiUrl = `https://graph.facebook.com/109960688796992/photos`;
+  async function schedulePost(pageAccessToken,message, pictureUrls, scheduledTime) {
+    const apiUrl = `https://graph.facebook.com/${PAGE_ID}/photos`;
 
     // Step 3: Prepare the post data
     const postData = {
@@ -66,7 +59,7 @@ function App() {
       );
       console.log(mediaIds)
       // Step 5: Create the post with attached media
-      const postUrl = `https://graph.facebook.com/109960688796992/feed`;
+      const postUrl = `https://graph.facebook.com/${PAGE_ID}/feed`;
       const formData = new FormData();
       formData.append("message", postData.message);
       formData.append(
@@ -100,26 +93,67 @@ function App() {
       console.error("Error scheduling post:", error);
     }
   }
+  
+  async function publishPost(pageAccessToken,message, pictureUrls) {
+    const apiUrl = `https://graph.facebook.com/${PAGE_ID}/photos`;
 
+    // Step 3: Prepare the post data
+    const postData = {
+      message: message,
+      access_token: pageAccessToken,
+    };
 
-  async function submitPublishPost(pageAccessToken, message, photoUrl) {
     try {
-      const response = await fetch(URL_ENDPOINT, {
-        method: "POST",
+      // Step 4: Upload the pictures and get their media IDs
+      const mediaIds = await Promise.all(
+        pictureUrls.map(async (url) => {
+          try {
+            console.log(url)
+            const response = await axios.post(apiUrl, {
+              url: url,
+              published: false,
+              access_token: pageAccessToken,
+            });
+  
+            if (response.status !== 200) {
+              throw new Error('Failed to upload picture');
+            }
+  
+            return response.data.id;
+          } catch (error) {
+            throw new Error(`Failed to upload picture: ${error.message}`);
+          }
+        })
+      );
+
+      // Step 5: Create the post with attached media
+      const postUrl = `https://graph.facebook.com/${PAGE_ID}/feed`;
+      const formData = new FormData();
+      formData.append("message", postData.message);
+      formData.append("access_token", postData.access_token);
+      mediaIds.forEach((mediaId, index) => {
+        formData.append(
+          `attached_media[${index}]`,
+          `{"media_fbid":"${mediaId}"}`
+        );
+      });
+      for (let [key, value] of formData.entries()) {
+        console.log(key, value);
+      }
+      // Step 6: Send the POST request to schedule the post
+      const response = await axios.post(postUrl, formData, {
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "multipart/form-data",
         },
-        body: JSON.stringify({
-          url: photoUrl,
-          caption: message,
-          access_token: pageAccessToken,
-        }),
       });
 
-      const responseData = await response.json();
-      console.log(responseData);
+      if (response.status !== 200) {
+        throw new Error("Failed to schedule post");
+      }
+
+      console.log("Post scheduled successfully:", response.data);
     } catch (error) {
-      console.log(error);
+      console.error("Error scheduling post:", error);
     }
   }
 
@@ -191,7 +225,6 @@ function App() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    //Create a Post Object
     const newPost = {
       postTo,
       selectedImages,
@@ -200,7 +233,7 @@ function App() {
     };
 
     if (scheduling === "Publish") {
-      submitPublishPost(ACCESS_TOKEN, newPost.postText, selectedImages[0]);
+      publishPost(ACCESS_TOKEN, newPost.postText, newPost.selectedImages);
     }
     if (scheduling === "Schedule") {
       newPost.scheduleDate = scheduleDate;
@@ -208,7 +241,7 @@ function App() {
       const date = newPost.scheduleDate + " " + newPost.scheduleTime;
       const timestamp = convertToTimestamp(date);
       newPost.timeStamp = timestamp;
-      schedulePost(newPost.postText, newPost.selectedImages, newPost.timeStamp)
+      schedulePost(ACCESS_TOKEN, newPost.postText, newPost.selectedImages, newPost.timeStamp)
     }
 
     console.log("New Post:", newPost);
