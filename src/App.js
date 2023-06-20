@@ -10,44 +10,96 @@ import InputGroup from "react-bootstrap/InputGroup";
 import { useState } from "react";
 import "./Styling/App.css";
 import FacebookPreview from "./Components/FacebookPreview";
+import axios from "axios";
 
 function App() {
   const [selectedImages, setSelectedImages] = useState([]);
   const [postTo, setPostTo] = useState("");
-  const [imageurl, setImage] = useState("");
   const [textGeneration, setTextGeneration] = useState("");
   const [imageGeneration, setImageGeneration] = useState("");
   const [postText, setPostText] = useState("");
   const [scheduling, setScheduling] = useState("Publish");
   const [scheduleTime, setScheduleTime] = useState("");
   const [scheduleDate, setScheduleDate] = useState("");
-  const ACCESS_TOKEN = "EAADtpk8ZCkPEBABepw79Ex5sHAW6LFZAST8M1cjxRN4VWJn89Whr1yKnNcokGq1Y38yZBJpUtdLbavy5uT823hpjww8BbfGGbPf5hG5JU0oQLm1ySZCoCpVWZBDPKiTBMCQkI0aze1mEBZBdxpVJskWUrH07Vz4ZAuhprWO2eYsrGF23ifMBbXTbrTSqnvZBiYOcrhS4DHc5Nkq87Y0faNBf";
+  const ACCESS_TOKEN =
+    "EAADtpk8ZCkPEBAMzfLnZC5KAQNRAw8KXJ0mF80tKWb5UT0COrII45e6OG1G8mptZA2e0DrSxKSvxbYBmRJ5YvDj1FZCxtMmiDos0QZCNvIEZCms9sKJtSYIricFrLbC4qTb8EGeGda2tZBskrOyFHnZCiPiU8UikG6RjUmHHddtAFL19xA7lZCQdrXyXBT3Cx3aoy0jZAWZCi8mnyW1ZBvx4LLSz";
   const PAGE_ID = "109960688796992";
   const URL_ENDPOINT = `https://graph.facebook.com/${PAGE_ID}/photos`;
-  const SCHEDULE_ENDPOINT = `https://graph.facebook.com/${PAGE_ID}/feed`;
 
-  async function submitSchedulePost(pageAccessToken, message, photoUrl, timeStamp){
-    try{
-      const response = await fetch (SCHEDULE_ENDPOINT, {
-        method:"POST",
+  async function schedulePost(message, pictureUrls, scheduledTime) {
+    // Step 1: Get the Page Access Token
+    const pageAccessToken =
+      "EAADtpk8ZCkPEBAB2djh2xadRjsFHiMYjNtuWLm4HzTaz6elRRPxw2bZAvXmhRvJtQgTZBaTjUQqMIwoYfuC74YZBwugtOvcWVA1TZAFi4gW0Gb40ZCVzrDjRfmHioUz9PZCW1IgjI9wGP2ZArJZBk6zacgeibTEQ4QMPhsDtkDtLI7rmiRjNx0xU7TEgaC7kQZCDf0nJ5hpZAXc5VW5OhaHuQlY";
+
+    // Step 2: Prepare the request URL
+    const apiUrl = `https://graph.facebook.com/109960688796992/photos`;
+
+    // Step 3: Prepare the post data
+    const postData = {
+      message: message,
+      scheduled_publish_time: Math.floor(scheduledTime),
+      published: false,
+      access_token: pageAccessToken,
+    };
+
+    try {
+      // Step 4: Upload the pictures and get their media IDs
+      const mediaIds = await Promise.all(
+        pictureUrls.map(async (url) => {
+          try {
+            console.log(url)
+            const response = await axios.post(apiUrl, {
+              url: url,
+              published: false,
+              access_token: pageAccessToken,
+            });
+  
+            if (response.status !== 200) {
+              throw new Error('Failed to upload picture');
+            }
+  
+            return response.data.id;
+          } catch (error) {
+            throw new Error(`Failed to upload picture: ${error.message}`);
+          }
+        })
+      );
+      console.log(mediaIds)
+      // Step 5: Create the post with attached media
+      const postUrl = `https://graph.facebook.com/109960688796992/feed`;
+      const formData = new FormData();
+      formData.append("message", postData.message);
+      formData.append(
+        "scheduled_publish_time",
+        postData.scheduled_publish_time
+      );
+      formData.append("published", postData.published);
+      formData.append("access_token", postData.access_token);
+      mediaIds.forEach((mediaId, index) => {
+        formData.append(
+          `attached_media[${index}]`,
+          `{"media_fbid":"${mediaId}"}`
+        );
+      });
+      for (let [key, value] of formData.entries()) {
+        console.log(key, value);
+      }
+      // Step 6: Send the POST request to schedule the post
+      const response = await axios.post(postUrl, formData, {
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "multipart/form-data",
         },
-        body: JSON.stringify({
-          url: photoUrl,
-          access_token: pageAccessToken,
-          message: message,
-          published: false,
-          scheduled_publish_time: timeStamp
-        }),
       });
 
-      const reponseData = await response.json();
-      console.log(reponseData);
-    }catch(error){
-      console.log(error)
+      if (response.status !== 200) {
+        throw new Error("Failed to schedule post");
+      }
+
+      console.log("Post scheduled successfully:", response.data);
+    } catch (error) {
+      console.error("Error scheduling post:", error);
     }
-  } 
+  }
 
 
   async function submitPublishPost(pageAccessToken, message, photoUrl) {
@@ -117,8 +169,8 @@ function App() {
       })
       .then((data) => {
         console.log(data.data[0].url);
-        setSelectedImages([...selectedImages, data.data[0].url])
-        setImageGeneration("")
+        setSelectedImages([...selectedImages, data.data[0].url]);
+        setImageGeneration("");
       });
   }
 
@@ -147,32 +199,32 @@ function App() {
       scheduling,
     };
 
-    if(scheduling === "Publish"){
+    if (scheduling === "Publish") {
       submitPublishPost(ACCESS_TOKEN, newPost.postText, selectedImages[0]);
     }
     if (scheduling === "Schedule") {
       newPost.scheduleDate = scheduleDate;
       newPost.scheduleTime = scheduleTime;
-      const date = newPost.scheduleDate + " " + newPost.scheduleTime
-      const timestamp = convertToTimestamp(date)
-      newPost.timeStamp = timestamp
-      submitSchedulePost(ACCESS_TOKEN, newPost.postText, selectedImages[0], timestamp)
+      const date = newPost.scheduleDate + " " + newPost.scheduleTime;
+      const timestamp = convertToTimestamp(date);
+      newPost.timeStamp = timestamp;
+      schedulePost(newPost.postText, newPost.selectedImages, newPost.timeStamp)
     }
 
     console.log("New Post:", newPost);
   };
 
   function convertToTimestamp(dateString) {
-    var parts = dateString.split(' ');
-    var dateParts = parts[0].split('/');
+    var parts = dateString.split(" ");
+    var dateParts = parts[0].split("/");
     var day = parseInt(dateParts[0], 10);
     var month = parseInt(dateParts[1], 10) - 1;
     var year = parseInt(dateParts[2], 10);
-    var timeParts = parts[1].split(':');
+    var timeParts = parts[1].split(":");
     var hours = parseInt(timeParts[0], 10);
     var minutes = parseInt(timeParts[1], 10);
     var dateObj = new Date(year, month, day, hours, minutes);
-    return dateObj.getTime()/1000;
+    return dateObj.getTime() / 1000;
   }
 
   const handlePostTo = (e) => {
