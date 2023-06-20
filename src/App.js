@@ -13,8 +13,8 @@ import FacebookPreview from "./Components/FacebookPreview";
 import axios from "axios";
 
 function App() {
-  const [selectedImages, setSelectedImages] = useState([]);
-  const [postTo, setPostTo] = useState("facebookpost");
+  const [selectedImages, setSelectedImages] = useState(["https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4"]);
+  const [postTo, setPostTo] = useState("facebookpage");
   const [textGeneration, setTextGeneration] = useState("");
   const [imageGeneration, setImageGeneration] = useState("");
   const [postText, setPostText] = useState("");
@@ -93,7 +93,7 @@ function App() {
       console.error("Error scheduling post:", error);
     }
   }
-  
+
   async function publishPost(pageAccessToken,message, pictureUrls) {
     const apiUrl = `https://graph.facebook.com/${PAGE_ID}/photos`;
 
@@ -208,11 +208,6 @@ function App() {
       });
   }
 
-  const handleScheduling = (e) => {
-    setScheduling(e.currentTarget.value);
-    console.log(scheduling);
-  };
-
   const handleImageChange = (event) => {
     const files = event.target.files;
     const imageArray = Array.from(files).slice(0, 10); // Limit to maximum of 10 images
@@ -263,6 +258,11 @@ function App() {
   const handlePostTo = (e) => {
     setPostTo(e.currentTarget.value);
     console.log(postTo);
+  };
+
+  const handleScheduling = (e) => {
+    setScheduling(e.currentTarget.value);
+    console.log(scheduling);
   };
 
   return (
