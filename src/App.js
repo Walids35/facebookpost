@@ -10,11 +10,12 @@ import InputGroup from "react-bootstrap/InputGroup";
 import { useState } from "react";
 import "./Styling/App.css";
 import FacebookPreview from "./Components/FacebookPreview";
+import {Image} from "react-bootstrap";
+import { Alert } from "react-bootstrap";
 import axios from "axios";
 
 function App() {
   const [selectedImages, setSelectedImages] = useState([
-    "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
   ]);
   const [postTo, setPostTo] = useState("photos");
   const [textGeneration, setTextGeneration] = useState("");
@@ -27,12 +28,7 @@ function App() {
     "EAADtpk8ZCkPEBAEzYbgJjemvucWFbLyGi4igwUoJwlKcWgvSGZAzwCHxBLSEkLSPo3sds7K2AFxofzijrPQoAAJZCRA6OdpdCgvQMZBpnwZB0r2ejW11UmWUv5SMuI6FQk5rDsUtZAEbmJMioKN8ZBovzR2DM15UPkMU9ZBmAox9ATjMDJrn6ZBzigGUhEfOGrulbe8spz67cZBlHN9lgOOGOa";
   const PAGE_ID = "109960688796992";
 
-  async function schedulePost(
-    pageAccessToken,
-    message,
-    pictureUrls,
-    scheduledTime
-  ) {
+  async function schedulePost(pageAccessToken,message,pictureUrls,scheduledTime) {
     const apiUrl = `https://graph.facebook.com/${PAGE_ID}/photos`;
 
     // Step 3: Prepare the post data
@@ -399,6 +395,9 @@ function App() {
             <Card className="mt-3">
               <Card.Body>
                 <Card.Title>Post Details</Card.Title>
+                <Alert key="warning" variant="warning">
+                  <Image src="exclamation-lg.svg" />New Feature: Generating Text and Image with AI
+                </Alert>
                 <InputGroup className="mb-3">
                   <Form.Control
                     placeholder="Generate Text"
