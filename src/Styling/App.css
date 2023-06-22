@@ -8,3 +8,7 @@
   --bs-btn-border-color: none;
   --bs-btn-active-bg: gray;
 }
+
+.card {
+  --bs-card-border-radius: 0;
+}

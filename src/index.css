@@ -12,5 +12,9 @@ body {
 }
 
 .bg-grey{
-  background-color: aliceblue;
+  background: linear-gradient(to right, #e6d8e7, #c6e2e9);
+}
+
+.card {
+  --bs-card-border-radius: 0;
 }
