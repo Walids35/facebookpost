@@ -382,7 +382,7 @@ function App() {
                 </Card.Text>
                 <Form.Group controlId="exampleForm.ControlInput1">
                   <label htmlFor="image-upload" className="btn btn-dark">
-                    Add Images
+                    {postTo === "photos" ? (<>Add Images</>) : (<>Add Video</>)}
                     <input
                       id="image-upload"
                       type="file"
