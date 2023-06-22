@@ -237,18 +237,6 @@ function App() {
     }
   }
 
-  async function getPageInfo(pageAccessToken){
-    const API_URL = `https://graph.facebook.com/${PAGE_ID}?fields=name,picture&access_token=${pageAccessToken}`
-    try{
-    const response = await axios.get(API_URL)
-
-    console.log("Successfuly Get Page Info", response.data)
-    return response.data
-  }catch(e){
-    console.log({error: e})
-  }
-  }
-
   function generatetext() {
     try {
       fetch("https://api.openai.com/v1/chat/completions", {
@@ -431,11 +419,11 @@ function App() {
                   selectedImages.map((image, index) => {
                     return (
                     <>
-                      <div key={index} className="p-2 d-flex justify-content-between align-items-baseline mt-1">
+                      <div key={index} className="p-2 d-flex justify-content-between mt-2">
                         <div className="d-flex">
-                        <Image src="three-dots-vertical.svg" />
-                        <Image src={image} style={{width: "50px"}} />
-                        <div className="ms-2" style={{fontSize:"12px"}}>{image}</div>
+                          <Image src="three-dots-vertical.svg" className="me-3" />
+                          <Image src={image} className="me-3" style={{width: "50px"}} />
+                          <div className="ms-2" style={{fontSize:"12px"}}>{image}</div>
                         </div>
                         <button onClick={() => handleImageDelete(index)}>
                           <Image src="trash3-fill.svg" />
@@ -525,6 +513,7 @@ function App() {
                       className="toggle"
                       id="tbg-radio-1"
                       value="Publish"
+                      variant="light"
                     >
                       Publish Now
                     </ToggleButton>
@@ -533,6 +522,7 @@ function App() {
                       className="toggle"
                       id="tbg-radio-2"
                       value="Schedule"
+                      variant="light"
                     >
                       Schedule
                     </ToggleButton>
