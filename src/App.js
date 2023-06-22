@@ -452,7 +452,7 @@ function App() {
               <Card.Body>
                 <Card.Title>Post Details</Card.Title>
                 <Alert key="warning" variant="warning">
-                  <Image src="exclamation-lg.svg" />New Feature: Generating Text and Image with AI
+                  <Image src="exclamation-lg.svg" /><span className="fw-semibold">New Feature:</span> Generate text and image with AI
                 </Alert>
                 <InputGroup className="mb-3">
                   <Form.Control
@@ -571,10 +571,10 @@ function App() {
             {/**Call To action Card */}
             <Card className="mt-3">
               <Card.Body>
-                <div style={{ display: "flex", alignItems: "flex-end" }}>
-                  <Button>Cancel</Button>
+                <div className="d-flex justify-content-end gap-2">
+                  <Button variant="light">Cancel</Button>
                   <Button
-                    variant="primary"
+                    variant="dark"
                     type="submit"
                     onClick={handleSubmit}
                   >
