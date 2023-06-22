@@ -7,7 +7,7 @@ import Col from "react-bootstrap/Col";
 import ToggleButton from "react-bootstrap/ToggleButton";
 import ToggleButtonGroup from "react-bootstrap/ToggleButtonGroup";
 import InputGroup from "react-bootstrap/InputGroup";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./Styling/App.css";
 import FacebookPreview from "./Components/FacebookPreview";
 import {Image} from "react-bootstrap";
@@ -17,6 +17,7 @@ import axios from "axios";
 function App() {
   const [selectedImages, setSelectedImages] = useState([
   ]);
+  const [pageInfo, setPageInfo] = useState({name: "", url:""})
   const [postTo, setPostTo] = useState("photos");
   const [textGeneration, setTextGeneration] = useState("");
   const [imageGeneration, setImageGeneration] = useState("");
@@ -25,8 +26,28 @@ function App() {
   const [scheduleTime, setScheduleTime] = useState("");
   const [scheduleDate, setScheduleDate] = useState("");
   const ACCESS_TOKEN =
-    "EAADtpk8ZCkPEBAEzYbgJjemvucWFbLyGi4igwUoJwlKcWgvSGZAzwCHxBLSEkLSPo3sds7K2AFxofzijrPQoAAJZCRA6OdpdCgvQMZBpnwZB0r2ejW11UmWUv5SMuI6FQk5rDsUtZAEbmJMioKN8ZBovzR2DM15UPkMU9ZBmAox9ATjMDJrn6ZBzigGUhEfOGrulbe8spz67cZBlHN9lgOOGOa";
+    "EAADtpk8ZCkPEBAPOozKsho4KBGWpni5QRFbE2Ok1rXFwl5qav3HfP0ZCZCZCKqYIE2WtDYJXOnfvLxKUB62B8iwbNLr1YNTZAXCaVZCFaYxzg7A5pbxfOB3kdVBHZAroE9Jydd6LK2w5CbtvjPghyz4NXGUAZARAT62q5QaL2ddLuAfZCxA5YvOeGQ11VmQM5xo7YocUHhCalpIYnRiZCyItM7";
   const PAGE_ID = "109960688796992";
+
+  useEffect(() => {
+    const fetchPageInfo = async () => {
+      const API_URL = `https://graph.facebook.com/${PAGE_ID}?fields=name,picture&access_token=${ACCESS_TOKEN}`;
+  
+      try {
+        const response = await axios.get(API_URL);
+        const pageInfo = {
+          name: response.data.name,
+          url: response.data.picture.data.url
+        }
+        setPageInfo(pageInfo);
+        console.log("Successfully Get Page Info", response.data);
+      } catch (error) {
+        console.log({ error });
+      }
+    };
+
+    fetchPageInfo();
+  }, [ACCESS_TOKEN]);
 
   async function schedulePost(pageAccessToken,message,pictureUrls,scheduledTime) {
     const apiUrl = `https://graph.facebook.com/${PAGE_ID}/photos`;
@@ -216,6 +237,18 @@ function App() {
     }
   }
 
+  async function getPageInfo(pageAccessToken){
+    const API_URL = `https://graph.facebook.com/${PAGE_ID}?fields=name,picture&access_token=${pageAccessToken}`
+    try{
+    const response = await axios.get(API_URL)
+
+    console.log("Successfuly Get Page Info", response.data)
+    return response.data
+  }catch(e){
+    console.log({error: e})
+  }
+  }
+
   function generatetext() {
     try {
       fetch("https://api.openai.com/v1/chat/completions", {
@@ -344,6 +377,11 @@ function App() {
     console.log(scheduling);
   };
 
+  const handleImageDelete = (i) => {
+    const updatedImages = selectedImages.filter((image,index) => index !== i)
+    setSelectedImages(updatedImages)
+  }
+
   return (
     <div className="p-5 bg-grey">
       <h4>Create Post</h4>
@@ -399,7 +437,7 @@ function App() {
                         <Image src={image} style={{width: "50px"}} />
                         <div className="ms-2" style={{fontSize:"12px"}}>{image}</div>
                         </div>
-                        <button>
+                        <button onClick={() => handleImageDelete(index)}>
                           <Image src="trash3-fill.svg" />
                         </button>
                       </div>
@@ -554,7 +592,7 @@ function App() {
             style={{ paddingLeft: "100px", paddingRight: "100px" }}
           >
             <h5>Facebook Feed preview</h5>
-            <FacebookPreview postText={postText} postImages={selectedImages} />
+            <FacebookPreview postText={postText} postImages={selectedImages} pageInfo={pageInfo} />
           </div>
         </Col>
       </Row>

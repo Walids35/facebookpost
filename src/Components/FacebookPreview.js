@@ -5,7 +5,7 @@ import Placeholder from "react-bootstrap/Placeholder";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 
-const FacebookPreview = ({ postText, postImages }) => {
+const FacebookPreview = ({ postText, postImages, pageInfo }) => {
   return (
     <>
       <Card className="mt-3">
@@ -13,12 +13,12 @@ const FacebookPreview = ({ postText, postImages }) => {
           <div className="d-flex">
             <Image
               className="border"
-              src="google_icon_130924.png"
+              src={pageInfo.url}
               roundedCircle
               style={{ height: "40px", width: "40px" }}
             />
             <div className="ms-2">
-              <p className="fw-semibold">Fan Music Band</p>
+              <p className="fw-semibold">{pageInfo.name}</p>
               <p
                 className="text-body-secondary "
                 style={{ marginTop: "-20px", fontSize: "12px" }}
