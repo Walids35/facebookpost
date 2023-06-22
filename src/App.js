@@ -389,6 +389,24 @@ function App() {
                     />
                   </label>
                 </Form.Group>
+                {selectedImages.length > 0 && (
+                  selectedImages.map((image, index) => {
+                    return (
+                    <>
+                      <div key={index} className="p-2 d-flex justify-content-between align-items-baseline mt-1">
+                        <div className="d-flex">
+                        <Image src="three-dots-vertical.svg" />
+                        <Image src={image} style={{width: "50px"}} />
+                        <div className="ms-2" style={{fontSize:"12px"}}>{image}</div>
+                        </div>
+                        <button>
+                          <Image src="trash3-fill.svg" />
+                        </button>
+                      </div>
+                    </>
+                    )
+                  })
+                )}
               </Card.Body>
             </Card>
             {/**Post Details */}
