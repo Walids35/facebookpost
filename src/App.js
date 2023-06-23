@@ -10,7 +10,7 @@ import InputGroup from "react-bootstrap/InputGroup";
 import { useEffect, useState } from "react";
 import "./Styling/App.css";
 import FacebookPreview from "./Components/FacebookPreview";
-import {Image} from "react-bootstrap";
+import { Image } from "react-bootstrap";
 import { Alert } from "react-bootstrap";
 import axios from "axios";
 import {
@@ -24,13 +24,11 @@ import { storage } from "./firebase";
 import { v4 } from "uuid";
 
 function App() {
-
-  const [imageUpload, setImageUpload] = useState(null);
-  const [imageUrls, setImageUrls] = useState([]);
-
-  const [selectedImages, setSelectedImages] = useState([
-  ]);
-  const [pageInfo, setPageInfo] = useState({name: "", url:""})
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [imageUpload, setImageUpload] = useState([]);
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [pageInfo, setPageInfo] = useState({ name: "", url: "" });
   const [postTo, setPostTo] = useState("photos");
   const [textGeneration, setTextGeneration] = useState("");
   const [imageGeneration, setImageGeneration] = useState("");
@@ -39,19 +37,19 @@ function App() {
   const [scheduleTime, setScheduleTime] = useState("");
   const [scheduleDate, setScheduleDate] = useState("");
   const ACCESS_TOKEN =
-    "EAADtpk8ZCkPEBAPOozKsho4KBGWpni5QRFbE2Ok1rXFwl5qav3HfP0ZCZCZCKqYIE2WtDYJXOnfvLxKUB62B8iwbNLr1YNTZAXCaVZCFaYxzg7A5pbxfOB3kdVBHZAroE9Jydd6LK2w5CbtvjPghyz4NXGUAZARAT62q5QaL2ddLuAfZCxA5YvOeGQ11VmQM5xo7YocUHhCalpIYnRiZCyItM7";
+    "EAADtpk8ZCkPEBACzmZAZAmZCczK5swzkhcFTMkSWYiowGRgSnRF4FIqHAj6ZBJPOTcNvjJDcWD63XdkMxXfpezZCPLLuxPXBIdh0Lv0aCyx0kGhq34KPa4IKgsxfHprGMBn8XWKAf2rHKFy2uGL5DZBjPeCR1z01G0J06aeniWnsGvVKFqGOTbHVvZBoZCibsqsHiH0DzuTrCyrdZB9Q1pKZBlD";
   const PAGE_ID = "109960688796992";
 
   useEffect(() => {
     const fetchPageInfo = async () => {
       const API_URL = `https://graph.facebook.com/${PAGE_ID}?fields=name,picture&access_token=${ACCESS_TOKEN}`;
-  
+
       try {
         const response = await axios.get(API_URL);
         const pageInfo = {
           name: response.data.name,
-          url: response.data.picture.data.url
-        }
+          url: response.data.picture.data.url,
+        };
         setPageInfo(pageInfo);
         console.log("Successfully Get Page Info", response.data);
       } catch (error) {
@@ -63,14 +61,23 @@ function App() {
   }, [ACCESS_TOKEN]);
 
   const uploadFile = () => {
-    if (imageUpload == null) return;
-    const imageRef = ref(storage, `images/${imageUpload.name + v4()}`);
-    uploadBytes(imageRef, imageUpload).then((snapshot) => {
-      getDownloadURL(snapshot.ref).then((url) => {
-        setImageUrls((prev) => [...prev, url]);
+    if (imageUpload.length > 0) {
+      setUploading(true);
+      imageUpload.forEach((file) => {
+        const imageRef = ref(storage, `images/${file.name + v4()}`);
+        uploadBytes(imageRef, file).then((snapshot) => {
+          console.log(snapshot)
+          getDownloadURL(snapshot.ref).then((url) => {
+            setSelectedImages((prev) => [...prev, url]);
+          });
+        });
       });
-    });
+      setImageUpload([]);
+      setUploading(false);
+      setUploadProgress(0);
+    }
   };
+
 
   async function schedulePost(pageAccessToken,message,pictureUrls,scheduledTime) {
     const apiUrl = `https://graph.facebook.com/${PAGE_ID}/photos`;
@@ -105,7 +112,6 @@ function App() {
           }
         })
       );
-      console.log(mediaIds);
       // Step 5: Create the post with attached media
       const postUrl = `https://graph.facebook.com/${PAGE_ID}/feed`;
       const formData = new FormData();
@@ -151,29 +157,28 @@ function App() {
       access_token: pageAccessToken,
     };
 
-    try {
-      // Step 4: Upload the pictures and get their media IDs
-      const mediaIds = await Promise.all(
-        pictureUrls.map(async (url) => {
-          try {
-            console.log(url);
-            const response = await axios.post(apiUrl, {
-              url: url,
-              published: false,
-              access_token: pageAccessToken,
-            });
+    const mediaIds = await Promise.all(
+      pictureUrls.map(async (url) => {
+        try {
+          console.log(url);
+          const response = await axios.post(apiUrl, {
+            url: url,
+            published: false,
+            access_token: pageAccessToken,
+          });
 
-            if (response.status !== 200) {
-              throw new Error("Failed to upload picture");
-            }
-
-            return response.data.id;
-          } catch (error) {
-            throw new Error(`Failed to upload picture: ${error.message}`);
+          if (response.status !== 200) {
+            throw new Error("Failed to upload picture");
           }
-        })
-      );
 
+          return response.data.id;
+        } catch (error) {
+          throw new Error(`Failed to upload picture: ${error.message}`);
+        }
+      })
+    );
+
+try{
       // Step 5: Create the post with attached media
       const postUrl = `https://graph.facebook.com/${PAGE_ID}/feed`;
       const formData = new FormData();
@@ -233,30 +238,38 @@ function App() {
     }
   }
 
-  async function scheduleVideo(pageAccessToken, message, videoURL, scheduledTime){
-    const API_URL = `https://graph.facebook.com/${PAGE_ID}/videos`
+  async function scheduleVideo(
+    pageAccessToken,
+    message,
+    videoURL,
+    scheduledTime
+  ) {
+    const API_URL = `https://graph.facebook.com/${PAGE_ID}/videos`;
 
     const PostData = {
       description: message,
       access_token: pageAccessToken,
       file_url: videoURL,
       published: false,
-      scheduled_publish_time: scheduledTime
-    }
+      scheduled_publish_time: scheduledTime,
+    };
 
-    try{
-      const formData = new FormData()
-      formData.append("description", PostData.description)
-      formData.append("access_token", PostData.access_token)
-      formData.append("file_url", PostData.file_url)
-      formData.append("published",PostData.published)
-      formData.append("scheduled_publish_time", PostData.scheduled_publish_time)
+    try {
+      const formData = new FormData();
+      formData.append("description", PostData.description);
+      formData.append("access_token", PostData.access_token);
+      formData.append("file_url", PostData.file_url);
+      formData.append("published", PostData.published);
+      formData.append(
+        "scheduled_publish_time",
+        PostData.scheduled_publish_time
+      );
 
-      const response = await axios.post(API_URL, formData)
+      const response = await axios.post(API_URL, formData);
 
-      console.log("Successfully Scheduled a post with a video", response.data)
-    }catch(e){
-      console.log({error: e})
+      console.log("Successfully Scheduled a post with a video", response.data);
+    } catch (e) {
+      console.log({ error: e });
     }
   }
 
@@ -311,14 +324,13 @@ function App() {
       });
   }
 
-  const handleImageChange = (event) => {
+  async function handleImageChange(event) {
     const files = event.target.files;
-    const imageArray = Array.from(files).slice(0, 10); // Limit to maximum of 10 images
-
-    const imageUrls = imageArray.map((file) => URL.createObjectURL(file));
-    setSelectedImages(imageUrls);
-    console.log(selectedImages);
-  };
+    const imageArray = Array.from(files);
+    imageArray.forEach((file) => {
+      setImageUpload((prev) => [...prev, file]);
+    });
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -348,20 +360,25 @@ function App() {
         );
       }
     } else {
-      if(scheduling === "Publish"){
+      if (scheduling === "Publish") {
         publishVideo(ACCESS_TOKEN, newPost.postText, newPost.selectedImages[0]);
-      }else{
+      } else {
         const date = scheduleDate + " " + scheduleTime;
-        const timestamp = convertToTimestamp(date)
+        const timestamp = convertToTimestamp(date);
         newPost.timeStamp = timestamp;
-        scheduleVideo(ACCESS_TOKEN, newPost.postText, newPost.selectedImages[0], newPost.timeStamp)
+        scheduleVideo(
+          ACCESS_TOKEN,
+          newPost.postText,
+          newPost.selectedImages[0],
+          newPost.timeStamp
+        );
       }
-      
-      
     }
 
-    setPostText("")
-    setSelectedImages([])
+    setImageGeneration("");
+    setPostText("");
+    setImageUpload([]);
+    setSelectedImages([]);
     console.log("New Post:", newPost);
   };
 
@@ -388,9 +405,14 @@ function App() {
     console.log(scheduling);
   };
 
-  const handleImageDelete = (i) => {
-    const updatedImages = selectedImages.filter((image,index) => index !== i)
-    setSelectedImages(updatedImages)
+  async function handleImageDelete(index) {
+    const updatedArray = selectedImages.filter((_, i) => i !== index);
+    await timeout(50);
+    setSelectedImages(updatedArray);
+  }
+
+  function timeout(delay) {
+    return new Promise((res) => setTimeout(res, delay));
   }
 
   return (
@@ -410,7 +432,7 @@ function App() {
         {/*Left Column*/}
         <Col className="mt-3" sm={6}>
           {/**Post To Card */}
-          <Form noValidate onSubmit={handleSubmit}>
+          <form noValidate onSubmit={handleSubmit}>
             <Card>
               <Card.Body>
                 <Card.Title>Post To</Card.Title>
@@ -435,37 +457,69 @@ function App() {
                   Share photos or a video. Instagram posts can't exceed 10
                   photos.
                 </Card.Text>
+                {imageUpload.length > 0 && (
+                  <div style={{ fontSize: "12px" }}>
+                    Images were Added - Please click on the upload button
+                  </div>
+                )}
                 <Form.Group controlId="exampleForm.ControlInput1">
                   <label htmlFor="image-upload" className="btn btn-dark">
-                    {postTo === "photos" ? (<>Add Images</>) : (<>Add Video</>)}
+                    {postTo === "photos" ? <> Add Images</> : <>Add Video</>}
                     <input
                       id="image-upload"
                       type="file"
                       accept="image/*, video/*"
+                      onChange={(e) => handleImageChange(e)}
                       multiple
-                      onChange={handleImageChange}
                       style={{ display: "none" }}
                     />
                   </label>
+                  <Button variant="light" onClick={uploadFile}>
+                    Upload
+                  </Button>
                 </Form.Group>
-                {selectedImages.length > 0 && (
+                {selectedImages.length > 0 &&
                   selectedImages.map((image, index) => {
                     return (
-                    <>
-                      <div key={index} className="p-2 d-flex justify-content-between mt-2">
-                        <div className="d-flex">
-                          <Image src="three-dots-vertical.svg" className="me-3" />
-                          <Image src={image} className="me-3" style={{width: "50px"}} />
-                          <div className="ms-2" style={{fontSize:"12px"}}>{image}</div>
-                        </div>
-                        <button onClick={() => handleImageDelete(index)}>
-                          <Image src="trash3-fill.svg" />
-                        </button>
-                      </div>
-                    </>
-                    )
-                  })
+                      <>
+                        <div
+                          key={index}
+                          className="p-2 d-flex justify-content-between mt-2"
+                        >
+                          <div className="d-flex">
+                            <Image
+                              src="three-dots-vertical.svg"
+                              className="me-3"
+                            />
+                            <Image
+                              src={image}
+                              className="me-3"
+                              style={{ width: "50px" }}
+                            />
+                            <div>
+                              <div
+                                className="ms-2"
+                                style={{ fontSize: "12px", width: "400px" }}
+                              >
+                                {image.slice(0, 100) + "....."}
+                              </div>
+                            </div>
+                          </div>
+                          {uploading && (
+                  <div>
+                    Uploading... {uploadProgress}% completed
+                  </div>
                 )}
+                          <button
+                            type="button"
+                            onClick={() => handleImageDelete(0)}
+                          >
+                            <Image src="trash3-fill.svg" />
+                          </button>
+                        </div>
+                      </>
+                    );
+                  })}
               </Card.Body>
             </Card>
             {/**Post Details */}
@@ -473,7 +527,9 @@ function App() {
               <Card.Body>
                 <Card.Title>Post Details</Card.Title>
                 <Alert key="warning" variant="warning">
-                  <Image src="exclamation-lg.svg" /><span className="fw-semibold">New Feature:</span> Generate text and image with AI
+                  <Image src="exclamation-lg.svg" />
+                  <span className="fw-semibold">New Feature:</span> Generate
+                  text and image with AI
                 </Alert>
                 <InputGroup className="mb-3">
                   <Form.Control
@@ -596,17 +652,13 @@ function App() {
               <Card.Body>
                 <div className="d-flex justify-content-end gap-2">
                   <Button variant="light">Cancel</Button>
-                  <Button
-                    variant="dark"
-                    type="submit"
-                    onClick={handleSubmit}
-                  >
+                  <Button variant="dark" onClick={handleSubmit}>
                     Submit
                   </Button>
                 </div>
               </Card.Body>
             </Card>
-          </Form>
+          </form>
         </Col>
         {/**Right Column */}
         <Col sm={6}>
@@ -615,7 +667,11 @@ function App() {
             style={{ paddingLeft: "100px", paddingRight: "100px" }}
           >
             <h5>Facebook Feed preview</h5>
-            <FacebookPreview postText={postText} postImages={selectedImages} pageInfo={pageInfo} />
+            <FacebookPreview
+              postText={postText}
+              postImages={selectedImages}
+              pageInfo={pageInfo}
+            />
           </div>
         </Col>
       </Row>
