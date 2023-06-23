@@ -39,21 +39,19 @@ const FacebookPreview = ({ postText, postImages, pageInfo }) => {
         {postImages.length === 0 ? (
           <Image src="ImagePlaceholder.png" />
         ) : (
-          <>
-            {postImages.map((image) => {
-              {
-                return image.includes(".mp4") || image.includes(".mov") ? (
+          <> {postImages[0].includes(".mp4") || postImages[0].includes(".mov") ? (
                   <iframe
                     class="embed-responsive-item"
                     src="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4"
                     allowfullscreen
                   ></iframe>
                 ) : (
-                  <Image src={image} />
-                );
+                  <Image src={postImages[0]} />
+                )
               }
-            })}
-            <p>{postImages.length - 1}</p>
+            <div className="text-light bg-black w-100 d-flex justify-content-center align-items-center" style={{height:"50px"}}>
+              + {postImages.length - 1 }
+            </div>
           </>
         )}
 

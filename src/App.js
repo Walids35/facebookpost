@@ -24,6 +24,8 @@ import { storage } from "./firebase";
 import { v4 } from "uuid";
 
 function App() {
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [imageUpload, setImageUpload] = useState([]);
   const [selectedImages, setSelectedImages] = useState([]);
   const [pageInfo, setPageInfo] = useState({ name: "", url: "" });
@@ -35,7 +37,7 @@ function App() {
   const [scheduleTime, setScheduleTime] = useState("");
   const [scheduleDate, setScheduleDate] = useState("");
   const ACCESS_TOKEN =
-    "EAADtpk8ZCkPEBACBCJnLImIjGjNaXyyZAeFZBDp34IjIUM2CQWghhfjWK0ZBeWSto5JZAX6lKs9D3DM0q4NiyRM3G7RVLv1WTX8ZAPHsmbGknSF8pMQ9EMxjZAfKKH5vBjOuFWB1NrzU3XZBH95mQ1iwG4BEtyTjkIm1NqZAufEesucKjB20vBcH8As8shMlmPuVVoeRLZBWSMG63mv6eQGhMT";
+    "EAADtpk8ZCkPEBACzmZAZAmZCczK5swzkhcFTMkSWYiowGRgSnRF4FIqHAj6ZBJPOTcNvjJDcWD63XdkMxXfpezZCPLLuxPXBIdh0Lv0aCyx0kGhq34KPa4IKgsxfHprGMBn8XWKAf2rHKFy2uGL5DZBjPeCR1z01G0J06aeniWnsGvVKFqGOTbHVvZBoZCibsqsHiH0DzuTrCyrdZB9Q1pKZBlD";
   const PAGE_ID = "109960688796992";
 
   useEffect(() => {
@@ -60,15 +62,19 @@ function App() {
 
   const uploadFile = () => {
     if (imageUpload.length > 0) {
+      setUploading(true);
       imageUpload.forEach((file) => {
         const imageRef = ref(storage, `images/${file.name + v4()}`);
         uploadBytes(imageRef, file).then((snapshot) => {
+          console.log(snapshot)
           getDownloadURL(snapshot.ref).then((url) => {
             setSelectedImages((prev) => [...prev, url]);
           });
         });
       });
-      setImageUpload([])
+      setImageUpload([]);
+      setUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -110,7 +116,6 @@ function App() {
           }
         })
       );
-      console.log(mediaIds);
       // Step 5: Create the post with attached media
       const postUrl = `https://graph.facebook.com/${PAGE_ID}/feed`;
       const formData = new FormData();
@@ -156,29 +161,28 @@ function App() {
       access_token: pageAccessToken,
     };
 
-    try {
-      // Step 4: Upload the pictures and get their media IDs
-      const mediaIds = await Promise.all(
-        pictureUrls.map(async (url) => {
-          try {
-            console.log(url);
-            const response = await axios.post(apiUrl, {
-              url: url,
-              published: false,
-              access_token: pageAccessToken,
-            });
+    const mediaIds = await Promise.all(
+      pictureUrls.map(async (url) => {
+        try {
+          console.log(url);
+          const response = await axios.post(apiUrl, {
+            url: url,
+            published: false,
+            access_token: pageAccessToken,
+          });
 
-            if (response.status !== 200) {
-              throw new Error("Failed to upload picture");
-            }
-
-            return response.data.id;
-          } catch (error) {
-            throw new Error(`Failed to upload picture: ${error.message}`);
+          if (response.status !== 200) {
+            throw new Error("Failed to upload picture");
           }
-        })
-      );
 
+          return response.data.id;
+        } catch (error) {
+          throw new Error(`Failed to upload picture: ${error.message}`);
+        }
+      })
+    );
+
+try{
       // Step 5: Create the post with attached media
       const postUrl = `https://graph.facebook.com/${PAGE_ID}/feed`;
       const formData = new FormData();
@@ -324,16 +328,13 @@ function App() {
       });
   }
 
-   async function handleImageChange (event, callback) {
+  async function handleImageChange(event) {
     const files = event.target.files;
     const imageArray = Array.from(files);
     imageArray.forEach((file) => {
       setImageUpload((prev) => [...prev, file]);
     });
-    await timeout(2000)
-    console.log(imageUpload)
-    callback()
-  };
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -378,9 +379,9 @@ function App() {
       }
     }
 
-    setImageGeneration("")
+    setImageGeneration("");
     setPostText("");
-    setImageUpload([])
+    setImageUpload([]);
     setSelectedImages([]);
     console.log("New Post:", newPost);
   };
@@ -408,16 +409,15 @@ function App() {
     console.log(scheduling);
   };
 
-  async function handleImageDelete (index) {
+  async function handleImageDelete(index) {
     const updatedArray = selectedImages.filter((_, i) => i !== index);
-    await timeout(50)
-    setSelectedImages(updatedArray)
-  };
-
-  function timeout(delay) {
-    return new Promise( res => setTimeout(res, delay) );
+    await timeout(50);
+    setSelectedImages(updatedArray);
   }
 
+  function timeout(delay) {
+    return new Promise((res) => setTimeout(res, delay));
+  }
 
   return (
     <div className="p-5 bg-grey">
@@ -451,25 +451,33 @@ function App() {
                   Share photos or a video. Instagram posts can't exceed 10
                   photos.
                 </Card.Text>
+                {imageUpload.length > 0 && (
+                  <div style={{ fontSize: "12px" }}>
+                    Images were Added - Please click on the upload button
+                  </div>
+                )}
                 <Form.Group controlId="exampleForm.ControlInput1">
                   <label htmlFor="image-upload" className="btn btn-dark">
-                    {postTo === "photos" ? <>Add Images</> : <>Add Video</>}
+                    {postTo === "photos" ? <> Add Images</> : <>Add Video</>}
                     <input
                       id="image-upload"
                       type="file"
                       accept="image/*, video/*"
-                      onChange={(e) => handleImageChange(e, uploadFile)}
+                      onChange={(e) => handleImageChange(e)}
                       multiple
                       style={{ display: "none" }}
                     />
                   </label>
+                  <Button variant="light" onClick={uploadFile}>
+                    Upload
+                  </Button>
                 </Form.Group>
                 {selectedImages.length > 0 &&
                   selectedImages.map((image, index) => {
                     return (
                       <>
                         <div
-                        key={index}
+                          key={index}
                           className="p-2 d-flex justify-content-between mt-2"
                         >
                           <div className="d-flex">
@@ -491,8 +499,15 @@ function App() {
                               </div>
                             </div>
                           </div>
-                          <div>{index}</div>
-                          <button onClick={() => handleImageDelete(0)}>
+                          {uploading && (
+                  <div>
+                    Uploading... {uploadProgress}% completed
+                  </div>
+                )}
+                          <button
+                            type="button"
+                            onClick={() => handleImageDelete(0)}
+                          >
                             <Image src="trash3-fill.svg" />
                           </button>
                         </div>
