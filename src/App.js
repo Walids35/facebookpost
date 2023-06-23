@@ -78,12 +78,8 @@ function App() {
     }
   };
 
-  async function schedulePost(
-    pageAccessToken,
-    message,
-    pictureUrls,
-    scheduledTime
-  ) {
+
+  async function schedulePost(pageAccessToken,message,pictureUrls,scheduledTime) {
     const apiUrl = `https://graph.facebook.com/${PAGE_ID}/photos`;
 
     // Step 3: Prepare the post data
@@ -421,6 +417,16 @@ try{
 
   return (
     <div className="p-5 bg-grey">
+      <input
+        type="file"
+        onChange={(event) => {
+          setImageUpload(event.target.files[0]);
+        }}
+      />
+      <button onClick={uploadFile}> Upload Image</button>
+      {imageUrls.map((url) => {
+        return <img src={url} />;
+      })}
       <h4>Create Post</h4>
       <Row>
         {/*Left Column*/}
