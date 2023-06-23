@@ -25,8 +25,11 @@ import { v4 } from "uuid";
 
 function App() {
 
+  const [imageUpload, setImageUpload] = useState([]);
   const [imageUrls, setImageUrls] = useState([]);
-  const [selectedImages, setSelectedImages] = useState([]);
+
+  const [selectedImages, setSelectedImages] = useState([
+  ]);
   const [pageInfo, setPageInfo] = useState({name: "", url:""})
   const [postTo, setPostTo] = useState("photos");
   const [textGeneration, setTextGeneration] = useState("");
@@ -35,8 +38,7 @@ function App() {
   const [scheduling, setScheduling] = useState("Publish");
   const [scheduleTime, setScheduleTime] = useState("");
   const [scheduleDate, setScheduleDate] = useState("");
-  const ACCESS_TOKEN =
-    "EAADtpk8ZCkPEBAASZClV4mmF0q9CPB4ZBhfDIM8ZACMTA7ClGWKHQ4mIxPDnEQJMYiOhroIPzNmOmpxiHKHKTxu6qs0GyqxkGTw3PZBoLnWYyhq9uz0h0wUlAbbF1EhNZAUFnZAiENe8Yrns5gyp1pYbwBaZA331mDGSuC0aKzezYBK3ackTnmQA18xZAQb9BgzA4ZCDt84chz96UgpKxpzSdJ";
+  const ACCESS_TOKEN = "EAADtpk8ZCkPEBAAOfncJMTpY7ZBVVtaoUZAIn3VGb8Yp8HBDFVursSZCGskQMTgS3uHZCZCHIZBHkFL7PJzTkpwYEGgPyLuZALoby6Y5fXW7OnGQsRdaZBTeTvVZCc8BxZBJYsdCZAV73F6U1ZCZAvbZBTXiNiEQNht8b1x34jZB1sbRbZCESX5vBWnuGXHsQ7Nap4Cu5OGdLwE3FgR066fAvpKOKnYbM";
   const PAGE_ID = "109960688796992";
 
   useEffect(() => {
@@ -61,19 +63,19 @@ function App() {
 
   useEffect(() => {
     uploadFile()
-  }, [selectedImages])
+    setImageUpload([])
+  }, [imageUpload])
 
   const uploadFile = () => {
-    console.log(selectedImages)
-    if (selectedImages.length == 0) return;
-    selectedImages.forEach((file) => {
-      const imageRef = ref(storage, `images/${file + v4()}`);
-      uploadBytes(imageRef, file).then((snapshot) => {
-        getDownloadURL(snapshot.ref).then((url) => {
-          setImageUrls((prev) => [...prev, url]);
-        });
+    if (imageUpload.length === 0) return;
+    imageUpload.forEach((file) => {
+    const imageRef = ref(storage, `images/${file.name + v4()}`);
+    uploadBytes(imageRef, file).then((snapshot) => {
+      getDownloadURL(snapshot.ref).then((url) => {
+        setSelectedImages((prev) => [...prev, url]);
       });
-    })
+    });
+  })
   };
 
   async function schedulePost(pageAccessToken,message,pictureUrls,scheduledTime) {
@@ -316,12 +318,11 @@ function App() {
   }
 
   const handleImageChange = (event) => {
-    const files = Array.from(event.target.files);
-    files.forEach((file) => {
-      const name = file.name
-      setSelectedImages((prev) => [...prev, name])
+    const files = event.target.files;
+    const imageArray = Array.from(files)
+    imageArray.forEach((file) => {
+      setImageUpload((prev) => [...prev, file])
     })
-    uploadFile()
   };
 
   const handleSubmit = (e) => {
@@ -450,7 +451,9 @@ function App() {
                         <div className="d-flex">
                           <Image src="three-dots-vertical.svg" className="me-3" />
                           <Image src={image} className="me-3" style={{width: "50px"}} />
-                          <div className="ms-2" style={{fontSize:"12px"}}>{image}</div>
+                          <div>
+                            <div className="ms-2" style={{fontSize:"12px", width:"400px"}}>{image.slice(0,100) + "....."}</div>
+                          </div>
                         </div>
                         <button onClick={() => handleImageDelete(index)}>
                           <Image src="trash3-fill.svg" />
