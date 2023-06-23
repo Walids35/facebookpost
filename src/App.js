@@ -13,10 +13,20 @@ import FacebookPreview from "./Components/FacebookPreview";
 import {Image} from "react-bootstrap";
 import { Alert } from "react-bootstrap";
 import axios from "axios";
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  listAll,
+  list,
+} from "firebase/storage";
+import { storage } from "./firebase";
+import { v4 } from "uuid";
 
 function App() {
-  const [selectedImages, setSelectedImages] = useState([
-  ]);
+
+  const [imageUrls, setImageUrls] = useState([]);
+  const [selectedImages, setSelectedImages] = useState([]);
   const [pageInfo, setPageInfo] = useState({name: "", url:""})
   const [postTo, setPostTo] = useState("photos");
   const [textGeneration, setTextGeneration] = useState("");
@@ -26,7 +36,7 @@ function App() {
   const [scheduleTime, setScheduleTime] = useState("");
   const [scheduleDate, setScheduleDate] = useState("");
   const ACCESS_TOKEN =
-    "EAADtpk8ZCkPEBAPOozKsho4KBGWpni5QRFbE2Ok1rXFwl5qav3HfP0ZCZCZCKqYIE2WtDYJXOnfvLxKUB62B8iwbNLr1YNTZAXCaVZCFaYxzg7A5pbxfOB3kdVBHZAroE9Jydd6LK2w5CbtvjPghyz4NXGUAZARAT62q5QaL2ddLuAfZCxA5YvOeGQ11VmQM5xo7YocUHhCalpIYnRiZCyItM7";
+    "EAADtpk8ZCkPEBAASZClV4mmF0q9CPB4ZBhfDIM8ZACMTA7ClGWKHQ4mIxPDnEQJMYiOhroIPzNmOmpxiHKHKTxu6qs0GyqxkGTw3PZBoLnWYyhq9uz0h0wUlAbbF1EhNZAUFnZAiENe8Yrns5gyp1pYbwBaZA331mDGSuC0aKzezYBK3ackTnmQA18xZAQb9BgzA4ZCDt84chz96UgpKxpzSdJ";
   const PAGE_ID = "109960688796992";
 
   useEffect(() => {
@@ -48,6 +58,23 @@ function App() {
 
     fetchPageInfo();
   }, [ACCESS_TOKEN]);
+
+  useEffect(() => {
+    uploadFile()
+  }, [selectedImages])
+
+  const uploadFile = () => {
+    console.log(selectedImages)
+    if (selectedImages.length == 0) return;
+    selectedImages.forEach((file) => {
+      const imageRef = ref(storage, `images/${file + v4()}`);
+      uploadBytes(imageRef, file).then((snapshot) => {
+        getDownloadURL(snapshot.ref).then((url) => {
+          setImageUrls((prev) => [...prev, url]);
+        });
+      });
+    })
+  };
 
   async function schedulePost(pageAccessToken,message,pictureUrls,scheduledTime) {
     const apiUrl = `https://graph.facebook.com/${PAGE_ID}/photos`;
@@ -289,12 +316,12 @@ function App() {
   }
 
   const handleImageChange = (event) => {
-    const files = event.target.files;
-    const imageArray = Array.from(files).slice(0, 10); // Limit to maximum of 10 images
-
-    const imageUrls = imageArray.map((file) => URL.createObjectURL(file));
-    setSelectedImages(imageUrls);
-    console.log(selectedImages);
+    const files = Array.from(event.target.files);
+    files.forEach((file) => {
+      const name = file.name
+      setSelectedImages((prev) => [...prev, name])
+    })
+    uploadFile()
   };
 
   const handleSubmit = (e) => {
@@ -409,8 +436,8 @@ function App() {
                       id="image-upload"
                       type="file"
                       accept="image/*, video/*"
-                      multiple
                       onChange={handleImageChange}
+                      multiple
                       style={{ display: "none" }}
                     />
                   </label>
