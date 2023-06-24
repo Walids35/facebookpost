@@ -1,34 +1,21 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
-import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
-import ToggleButton from "react-bootstrap/ToggleButton";
-import ToggleButtonGroup from "react-bootstrap/ToggleButtonGroup";
-import InputGroup from "react-bootstrap/InputGroup";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "./Styling/App.css";
 import FacebookPreview from "./Components/FacebookPreview";
-import { Image } from "react-bootstrap";
-import { Alert } from "react-bootstrap";
 import axios from "axios";
-import {
-  ref,
-  uploadBytes,
-  getDownloadURL,
-  listAll,
-  list,
-} from "firebase/storage";
-import { storage } from "./firebase";
-import { v4 } from "uuid";
+import PostToCard from "./Components/Cards/PostToCard";
+import MediaCard from "./Components/Cards/MediaCard";
+import config from "./config/config";
+import PostDetails from "./Components/Cards/PostDetails";
+import SchedulingCard from "./Components/Cards/SchedulingCard";
 
 function App() {
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [imageUpload, setImageUpload] = useState([]);
   const [selectedImages, setSelectedImages] = useState([]);
-  const [pageInfo, setPageInfo] = useState({ name: "", url: "" });
   const [postTo, setPostTo] = useState("photos");
   const [textGeneration, setTextGeneration] = useState("");
   const [imageGeneration, setImageGeneration] = useState("");
@@ -36,47 +23,6 @@ function App() {
   const [scheduling, setScheduling] = useState("Publish");
   const [scheduleTime, setScheduleTime] = useState("");
   const [scheduleDate, setScheduleDate] = useState("");
-  const ACCESS_TOKEN =
-    "EAADtpk8ZCkPEBACzmZAZAmZCczK5swzkhcFTMkSWYiowGRgSnRF4FIqHAj6ZBJPOTcNvjJDcWD63XdkMxXfpezZCPLLuxPXBIdh0Lv0aCyx0kGhq34KPa4IKgsxfHprGMBn8XWKAf2rHKFy2uGL5DZBjPeCR1z01G0J06aeniWnsGvVKFqGOTbHVvZBoZCibsqsHiH0DzuTrCyrdZB9Q1pKZBlD";
-  const PAGE_ID = "109960688796992";
-
-  useEffect(() => {
-    const fetchPageInfo = async () => {
-      const API_URL = `https://graph.facebook.com/${PAGE_ID}?fields=name,picture&access_token=${ACCESS_TOKEN}`;
-
-      try {
-        const response = await axios.get(API_URL);
-        const pageInfo = {
-          name: response.data.name,
-          url: response.data.picture.data.url,
-        };
-        setPageInfo(pageInfo);
-        console.log("Successfully Get Page Info", response.data);
-      } catch (error) {
-        console.log({ error });
-      }
-    };
-
-    fetchPageInfo();
-  }, [ACCESS_TOKEN]);
-
-  const uploadFile = () => {
-    if (imageUpload.length > 0) {
-      setUploading(true);
-      imageUpload.forEach((file) => {
-        const imageRef = ref(storage, `images/${file.name + v4()}`);
-        uploadBytes(imageRef, file).then((snapshot) => {
-          console.log(snapshot)
-          getDownloadURL(snapshot.ref).then((url) => {
-            setSelectedImages((prev) => [...prev, url]);
-          });
-        });
-      });
-      setImageUpload([]);
-      setUploading(false);
-      setUploadProgress(0);
-    }
-  };
 
   async function schedulePost(
     pageAccessToken,
@@ -84,7 +30,7 @@ function App() {
     pictureUrls,
     scheduledTime
   ) {
-    const apiUrl = `https://graph.facebook.com/${PAGE_ID}/photos`;
+    const apiUrl = `https://graph.facebook.com/${config.PAGE_ID}/photos`;
 
     // Step 3: Prepare the post data
     const postData = {
@@ -117,7 +63,7 @@ function App() {
         })
       );
       // Step 5: Create the post with attached media
-      const postUrl = `https://graph.facebook.com/${PAGE_ID}/feed`;
+      const postUrl = `https://graph.facebook.com/${config.PAGE_ID}/feed`;
       const formData = new FormData();
       formData.append("message", postData.message);
       formData.append(
@@ -153,7 +99,7 @@ function App() {
   }
 
   async function publishPost(pageAccessToken, message, pictureUrls) {
-    const apiUrl = `https://graph.facebook.com/${PAGE_ID}/photos`;
+    const apiUrl = `https://graph.facebook.com/${config.PAGE_ID}/photos`;
 
     // Step 3: Prepare the post data
     const postData = {
@@ -184,7 +130,7 @@ function App() {
 
 try{
       // Step 5: Create the post with attached media
-      const postUrl = `https://graph.facebook.com/${PAGE_ID}/feed`;
+      const postUrl = `https://graph.facebook.com/${config.PAGE_ID}/feed`;
       const formData = new FormData();
       formData.append("message", postData.message);
       formData.append("access_token", postData.access_token);
@@ -215,7 +161,7 @@ try{
   }
 
   async function publishVideo(pageAccessToken, message, videoURL) {
-    const API_URL = `https://graph.facebook.com/${PAGE_ID}/videos`;
+    const API_URL = `https://graph.facebook.com/${config.PAGE_ID}/videos`;
 
     const PostData = {
       description: message,
@@ -248,7 +194,7 @@ try{
     videoURL,
     scheduledTime
   ) {
-    const API_URL = `https://graph.facebook.com/${PAGE_ID}/videos`;
+    const API_URL = `https://graph.facebook.com/${config.PAGE_ID}/videos`;
 
     const PostData = {
       description: message,
@@ -277,65 +223,6 @@ try{
     }
   }
 
-  function generatetext() {
-    try {
-      fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization:
-            "Bearer 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",
-        },
-        body: JSON.stringify({
-          model: "gpt-3.5-turbo",
-          messages: [{ role: "user", content: textGeneration }],
-        }),
-      })
-        .then((res) => {
-          return res.json();
-        })
-        .then((data) => {
-          console.log(data.choices[0].message.content);
-          setPostText(data.choices[0].message.content);
-          setTextGeneration("");
-        });
-    } catch (err) {
-      console.log(err);
-    }
-  }
-
-  function generateimage() {
-    fetch("https://api.openai.com/v1/images/generations", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization:
-          "Bearer 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",
-      },
-      body: JSON.stringify({
-        prompt: imageGeneration,
-        n: 1,
-        size: "1024x1024",
-      }),
-    })
-      .then((res) => {
-        return res.json();
-      })
-      .then((data) => {
-        console.log(data.data[0].url);
-        setSelectedImages([...selectedImages, data.data[0].url]);
-        setImageGeneration("");
-      });
-  }
-
-  async function handleImageChange(event) {
-    const files = event.target.files;
-    const imageArray = Array.from(files);
-    imageArray.forEach((file) => {
-      setImageUpload((prev) => [...prev, file]);
-    });
-  }
-
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -348,7 +235,7 @@ try{
 
     if (postTo === "photos") {
       if (scheduling === "Publish") {
-        publishPost(ACCESS_TOKEN, newPost.postText, newPost.selectedImages);
+        publishPost(config.ACCESS_TOKEN, newPost.postText, newPost.selectedImages);
       }
       if (scheduling === "Schedule") {
         newPost.scheduleDate = scheduleDate;
@@ -357,7 +244,7 @@ try{
         const timestamp = convertToTimestamp(date);
         newPost.timeStamp = timestamp;
         schedulePost(
-          ACCESS_TOKEN,
+          config.ACCESS_TOKEN,
           newPost.postText,
           newPost.selectedImages,
           newPost.timeStamp
@@ -365,13 +252,13 @@ try{
       }
     } else {
       if (scheduling === "Publish") {
-        publishVideo(ACCESS_TOKEN, newPost.postText, newPost.selectedImages[0]);
+        publishVideo(config.ACCESS_TOKEN, newPost.postText, newPost.selectedImages[0]);
       } else {
         const date = scheduleDate + " " + scheduleTime;
         const timestamp = convertToTimestamp(date);
         newPost.timeStamp = timestamp;
         scheduleVideo(
-          ACCESS_TOKEN,
+          config.ACCESS_TOKEN,
           newPost.postText,
           newPost.selectedImages[0],
           newPost.timeStamp
@@ -404,21 +291,6 @@ try{
     console.log(postTo);
   };
 
-  const handleScheduling = (e) => {
-    setScheduling(e.currentTarget.value);
-    console.log(scheduling);
-  };
-
-  async function handleImageDelete(index) {
-    const updatedArray = selectedImages.filter((_, i) => i !== index);
-    await timeout(50);
-    setSelectedImages(updatedArray);
-  }
-
-  function timeout(delay) {
-    return new Promise((res) => setTimeout(res, delay));
-  }
-
   return (
     <div className="p-5 bg-grey">
       <h4>Create Post</h4>
@@ -427,220 +299,13 @@ try{
         <Col className="mt-3" sm={6}>
           {/**Post To Card */}
           <form noValidate onSubmit={handleSubmit}>
-            <Card>
-              <Card.Body>
-                <Card.Title>Post To</Card.Title>
-                <Form.Group controlId="exampleForm.SelectCustom">
-                  <Form.Label>Select an option:</Form.Label>
-                  <Form.Control
-                    as="select"
-                    onChange={handlePostTo}
-                    value={postTo}
-                  >
-                    <option value="photos">Post one or multiple photos</option>
-                    <option value="video">Post a video</option>
-                  </Form.Control>
-                </Form.Group>
-              </Card.Body>
-            </Card>
+            <PostToCard postTo={postTo} handlePostTo={handlePostTo} />
             {/**Media Card */}
-            <Card className="mt-3">
-              <Card.Body>
-                <Card.Title>Media</Card.Title>
-                <Card.Text>
-                  Share photos or a video. Instagram posts can't exceed 10
-                  photos.
-                </Card.Text>
-                {imageUpload.length > 0 && (
-                  <div style={{ fontSize: "12px" }}>
-                    Images were Added - Please click on the upload button
-                  </div>
-                )}
-                <Form.Group controlId="exampleForm.ControlInput1">
-                  <label htmlFor="image-upload" className="btn btn-dark">
-                    {postTo === "photos" ? <> Add Images</> : <>Add Video</>}
-                    <input
-                      id="image-upload"
-                      type="file"
-                      accept="image/*, video/*"
-                      onChange={(e) => handleImageChange(e)}
-                      multiple
-                      style={{ display: "none" }}
-                    />
-                  </label>
-                  <Button variant="light" onClick={uploadFile}>
-                    Upload
-                  </Button>
-                </Form.Group>
-                {selectedImages.length > 0 &&
-                  selectedImages.map((image, index) => {
-                    return (
-                      <>
-                        <div
-                          key={index}
-                          className="p-2 d-flex justify-content-between mt-2"
-                        >
-                          <div className="d-flex">
-                            <Image
-                              src="three-dots-vertical.svg"
-                              className="me-3"
-                            />
-                            <Image
-                              src={image}
-                              className="me-3"
-                              style={{ width: "50px" }}
-                            />
-                            <div>
-                              <div
-                                className="ms-2"
-                                style={{ fontSize: "12px", width: "400px" }}
-                              >
-                                {image.slice(0, 100) + "....."}
-                              </div>
-                            </div>
-                          </div>
-                          {uploading && (
-                  <div>
-                    Uploading... {uploadProgress}% completed
-                  </div>
-                )}
-                          <button
-                            type="button"
-                            onClick={() => handleImageDelete(0)}
-                          >
-                            <Image src="trash3-fill.svg" />
-                          </button>
-                        </div>
-                      </>
-                    );
-                  })}
-              </Card.Body>
-            </Card>
+            <MediaCard postTo={postTo} setSelectedImages={setSelectedImages} selectedImages={selectedImages} imageUpload={imageUpload} setImageUpload={setImageUpload}/>
             {/**Post Details */}
-            <Card className="mt-3">
-              <Card.Body>
-                <Card.Title>Post Details</Card.Title>
-                <Alert key="warning" variant="warning">
-                  <Image src="exclamation-lg.svg" />
-                  <span className="fw-semibold">New Feature:</span> Generate
-                  text and image with AI
-                </Alert>
-                <InputGroup className="mb-3">
-                  <Form.Control
-                    placeholder="Generate Text"
-                    onChange={(e) => setTextGeneration(e.currentTarget.value)}
-                    aria-label="Generate Text"
-                    value={textGeneration}
-                    aria-describedby="basic-addon2"
-                  />
-                  <Button
-                    variant="outline-secondary"
-                    id="button-addon2"
-                    onClick={generatetext}
-                  >
-                    Generate
-                  </Button>
-                </InputGroup>
-                {postTo === "photos" && (
-                  <InputGroup className="mb-3">
-                    <Form.Control
-                      placeholder="Generate Image"
-                      onChange={(e) =>
-                        setImageGeneration(e.currentTarget.value)
-                      }
-                      value={imageGeneration}
-                      aria-label="Generate Image"
-                      aria-describedby="basic-addon2"
-                    />
-                    <Button
-                      variant="outline-secondary"
-                      id="button-addon2"
-                      onClick={generateimage}
-                    >
-                      Generate
-                    </Button>
-                  </InputGroup>
-                )}
-
-                <Form.Group>
-                  <Form.Label>Text</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    value={postText}
-                    required
-                    aria-label="With textarea"
-                    onChange={(e) => setPostText(e.currentTarget.value)}
-                  />
-                </Form.Group>
-              </Card.Body>
-            </Card>
+            <PostDetails postTo={postTo} postText={postText} setPostText={setPostText} imageGeneration={imageGeneration} setImageGeneration={setImageGeneration} textGeneration={textGeneration} setTextGeneration={setTextGeneration} selectedImages={selectedImages} setSelectedImages={setSelectedImages} />
             {/**Publish options */}
-            <Card className="mt-3">
-              <Card.Body>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "baseline",
-                  }}
-                >
-                  <Card.Title>Scheduling Options</Card.Title>
-                  <ToggleButtonGroup
-                    className="mt-2"
-                    type="radio"
-                    name="options"
-                    defaultValue="Publish"
-                  >
-                    <ToggleButton
-                      onChange={handleScheduling}
-                      className="toggle"
-                      id="tbg-radio-1"
-                      value="Publish"
-                      variant="light"
-                    >
-                      Publish Now
-                    </ToggleButton>
-                    <ToggleButton
-                      onChange={handleScheduling}
-                      className="toggle"
-                      id="tbg-radio-2"
-                      value="Schedule"
-                      variant="light"
-                    >
-                      Schedule
-                    </ToggleButton>
-                  </ToggleButtonGroup>
-                </div>
-                {scheduling === "Schedule" && (
-                  <>
-                    <div className="mt-2">
-                      <p>
-                        Schedule your post for the times when your audience is
-                        most active, or manually select a date and time in the
-                        future to publish your post.
-                      </p>
-                      <InputGroup className="mb-3">
-                        <InputGroup.Text>Date and Time</InputGroup.Text>
-                        <Form.Control
-                          aria-label="Date"
-                          placeholder="DD/MM/YYYY"
-                          onChange={(e) =>
-                            setScheduleDate(e.currentTarget.value)
-                          }
-                        />
-                        <Form.Control
-                          aria-label="Time"
-                          placeholder="00:00"
-                          onChange={(e) =>
-                            setScheduleTime(e.currentTarget.value)
-                          }
-                        />
-                      </InputGroup>
-                    </div>
-                  </>
-                )}
-              </Card.Body>
-            </Card>
+            <SchedulingCard scheduling={scheduling} setScheduling={setScheduling} setScheduleDate={setScheduleDate} setScheduleTime={setScheduleTime} />
             {/**Call To action Card */}
             <Card className="mt-3">
               <Card.Body>
@@ -664,7 +329,6 @@ try{
             <FacebookPreview
               postText={postText}
               postImages={selectedImages}
-              pageInfo={pageInfo}
             />
           </div>
         </Col>

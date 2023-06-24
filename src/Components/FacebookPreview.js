@@ -4,13 +4,25 @@ import { Image } from "react-bootstrap";
 import Placeholder from "react-bootstrap/Placeholder";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import usePageInfo from "../hooks/usePageInfo";
 
-const FacebookPreview = ({ postText, postImages, pageInfo }) => {
+const FacebookPreview = ({ postText, postImages }) => {
+
+  const { pageInfo, loading } = usePageInfo()
+
+  if (loading) {
+    return (<div class="d-flex justify-content-center">
+    <div class="spinner-border" role="status">
+      <span class="sr-only"></span>
+    </div>
+  </div>)
+  }
   return (
     <>
       <Card className="mt-3">
         <div className="px-4 py-3">
           <div className="d-flex">
+            
             <Image
               className="border"
               src={pageInfo.url}
@@ -18,7 +30,7 @@ const FacebookPreview = ({ postText, postImages, pageInfo }) => {
               style={{ height: "40px", width: "40px" }}
             />
             <div className="ms-2">
-              <p className="fw-semibold">{pageInfo.name}</p>
+             <p className="fw-semibold">{pageInfo.name}</p>
               <p
                 className="text-body-secondary "
                 style={{ marginTop: "-20px", fontSize: "12px" }}
@@ -39,14 +51,14 @@ const FacebookPreview = ({ postText, postImages, pageInfo }) => {
         {postImages.length === 0 ? (
           <Image src="ImagePlaceholder.png" />
         ) : (
-          <> {postImages[0].includes(".mp4") || postImages[0].includes(".mov") ? (
+          <> {postImages[0].url.includes(".mp4") || postImages[0].url.includes(".mov") ? (
                   <iframe
                     class="embed-responsive-item"
                     src="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4"
                     allowfullscreen
                   ></iframe>
                 ) : (
-                  <Image src={postImages[0]} />
+                  <Image src={postImages[0].url} />
                 )
               }
             <div className="text-light bg-black w-100 d-flex justify-content-center align-items-center" style={{height:"50px"}}>
