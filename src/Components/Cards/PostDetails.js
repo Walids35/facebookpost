@@ -34,6 +34,11 @@ const PostDetails = ({ postTo, postText, setPostText, textGeneration, setTextGen
   }
 
   function generateimage() {
+    const newImage = {
+      url: '',
+      loading: true
+    }
+    setSelectedImages((prev) => [...prev, newImage])
     fetch("https://api.openai.com/v1/images/generations", {
       method: "POST",
       headers: {
@@ -52,7 +57,9 @@ const PostDetails = ({ postTo, postText, setPostText, textGeneration, setTextGen
       })
       .then((data) => {
         console.log(data.data[0].url);
-        setSelectedImages([...selectedImages, data.data[0].url]);
+        const previousImages = [...selectedImages]
+        previousImages[previousImages.length] = {url : data.data[0].url, loading: false}
+        setSelectedImages(previousImages)
         setImageGeneration("");
       });
   }

@@ -47,7 +47,7 @@ function App() {
           try {
             console.log(url);
             const response = await axios.post(apiUrl, {
-              url: url,
+              url: url.url,
               published: false,
               access_token: pageAccessToken,
             });
@@ -112,7 +112,7 @@ function App() {
         try {
           console.log(url);
           const response = await axios.post(apiUrl, {
-            url: url,
+            url: url.url,
             published: false,
             access_token: pageAccessToken,
           });
