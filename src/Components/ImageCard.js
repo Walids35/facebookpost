@@ -1,9 +1,12 @@
 import { Image } from "react-bootstrap";
-
+import Spinner from 'react-bootstrap/Spinner';
 const ImageCard = ({index, image, handleImageDelete}) => {
 
   if (image.loading) {
-    return <div>Loading...</div>;
+    return (<div className="w-100 d-flex justify-content-center align-items-center" style={{height: "50px"}}>
+      <Spinner animation="border" role="status"></Spinner>
+    </div>
+    );
   }
 
   return (
