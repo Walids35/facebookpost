@@ -1,6 +1,7 @@
 import Card from "react-bootstrap/Card";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
+import AlertError from "../AlertError";
 import {
     ref,
     uploadBytes,
@@ -10,7 +11,7 @@ import {
 import { v4 } from "uuid";
 import ImageCard from "../ImageCard";
 
-const MediaCard = ({postTo, setSelectedImages, selectedImages, imageUpload, setImageUpload}) => {
+const MediaCard = ({postTo, setSelectedImages, selectedImages, imageUpload, setImageUpload, verifyMedias}) => {
   console.log(selectedImages)
   const uploadFile = () => {
     if (imageUpload.length > 0) {
@@ -33,41 +34,6 @@ const MediaCard = ({postTo, setSelectedImages, selectedImages, imageUpload, setI
       });
       setImageUpload([]);
     }
-  };
-  const uploadVideo = (videoFile) => {
-    const videoRef = ref(storage, `videos/${videoFile + v4()}`);
-    const uploadTask = uploadBytes(videoRef, videoFile);
-  
-    return new Promise((resolve, reject) => {
-      uploadTask.on(
-        'state_changed',
-        (snapshot) => {
-          // Handle upload progress if needed
-          const progress = Math.round(
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-          );
-          console.log(`Upload progress: ${progress}%`);
-        },
-        (error) => {
-          // Handle upload error
-          console.error(error);
-          reject(error);
-        },
-        () => {
-          // Handle upload completion
-          getDownloadURL(uploadTask.snapshot.ref)
-            .then((url) => {
-              setSelectedImages({url: url, loading: false})
-              console.log('Video upload completed');
-              resolve(url);
-            })
-            .catch((error) => {
-              console.error(error);
-              reject(error);
-            });
-        }
-      );
-    });
   };
 
   async function handleImageChange(event) {
@@ -96,6 +62,7 @@ const MediaCard = ({postTo, setSelectedImages, selectedImages, imageUpload, setI
                   Share photos or a video. Instagram posts can't exceed 10
                   photos.
                 </Card.Text>
+                {(selectedImages.length > 0 && verifyMedias() === true) && <AlertError />}
                 {imageUpload.length > 0 && (
                   <div style={{ fontSize: "12px" }}>
                     Images were Added - Please click on the upload button

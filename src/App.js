@@ -167,7 +167,7 @@ try{
       description: message,
       access_token: pageAccessToken,
       published: true,
-      file_url: videoURL,
+      file_url: videoURL.url,
     };
     console.log(PostData);
     try {
@@ -199,7 +199,7 @@ try{
     const PostData = {
       description: message,
       access_token: pageAccessToken,
-      file_url: videoURL,
+      file_url: videoURL.url,
       published: false,
       scheduled_publish_time: scheduledTime,
     };
@@ -291,6 +291,30 @@ try{
     console.log(postTo);
   };
 
+  function isVideoUrl() {
+    return selectedImages.some((image) => {
+      return image.url.includes('.mp4') || image.url.includes('.mov');
+    });
+  }
+
+  function isImageUrl(){
+    return selectedImages.some((image) => {
+      return image.url.includes('.png') || image.url.includes('.jpg') || image.url.includes('.jpeg');
+    })
+  }
+
+  function verifyMedias() {
+    if (postTo === 'photos' && isVideoUrl()) {
+      return true;
+    }
+    if(postTo === 'video' && isImageUrl()){
+      return true;
+    }
+    return false
+  }
+
+  console.log(verifyMedias()) 
+
   return (
     <div className="p-5 bg-grey">
       <h4>Create Post</h4>
@@ -301,7 +325,7 @@ try{
           <form noValidate onSubmit={handleSubmit}>
             <PostToCard postTo={postTo} handlePostTo={handlePostTo} />
             {/**Media Card */}
-            <MediaCard postTo={postTo} setSelectedImages={setSelectedImages} selectedImages={selectedImages} imageUpload={imageUpload} setImageUpload={setImageUpload}/>
+            <MediaCard postTo={postTo} setSelectedImages={setSelectedImages} selectedImages={selectedImages} imageUpload={imageUpload} setImageUpload={setImageUpload} verifyMedias={verifyMedias}/>
             {/**Post Details */}
             <PostDetails postTo={postTo} postText={postText} setPostText={setPostText} imageGeneration={imageGeneration} setImageGeneration={setImageGeneration} textGeneration={textGeneration} setTextGeneration={setTextGeneration} selectedImages={selectedImages} setSelectedImages={setSelectedImages} />
             {/**Publish options */}
@@ -311,7 +335,7 @@ try{
               <Card.Body>
                 <div className="d-flex justify-content-end gap-2">
                   <Button variant="light">Cancel</Button>
-                  <Button variant="dark" onClick={handleSubmit}>
+                  <Button variant="dark" onClick={handleSubmit} disabled={verifyMedias()}>
                     Submit
                   </Button>
                 </div>
