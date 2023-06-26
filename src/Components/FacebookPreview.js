@@ -54,7 +54,7 @@ const FacebookPreview = ({ postText, postImages }) => {
           <> {postImages[0].url.includes(".mp4") || postImages[0].url.includes(".mov") ? (
                   <iframe
                     class="embed-responsive-item"
-                    src="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4"
+                    src={postImages[0].url}
                     allowfullscreen
                   ></iframe>
                 ) : (

@@ -34,6 +34,41 @@ const MediaCard = ({postTo, setSelectedImages, selectedImages, imageUpload, setI
       setImageUpload([]);
     }
   };
+  const uploadVideo = (videoFile) => {
+    const videoRef = ref(storage, `videos/${videoFile + v4()}`);
+    const uploadTask = uploadBytes(videoRef, videoFile);
+  
+    return new Promise((resolve, reject) => {
+      uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+          // Handle upload progress if needed
+          const progress = Math.round(
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+          );
+          console.log(`Upload progress: ${progress}%`);
+        },
+        (error) => {
+          // Handle upload error
+          console.error(error);
+          reject(error);
+        },
+        () => {
+          // Handle upload completion
+          getDownloadURL(uploadTask.snapshot.ref)
+            .then((url) => {
+              setSelectedImages({url: url, loading: false})
+              console.log('Video upload completed');
+              resolve(url);
+            })
+            .catch((error) => {
+              console.error(error);
+              reject(error);
+            });
+        }
+      );
+    });
+  };
 
   async function handleImageChange(event) {
     const files = event.target.files;
@@ -72,7 +107,7 @@ const MediaCard = ({postTo, setSelectedImages, selectedImages, imageUpload, setI
                     <input
                       id="image-upload"
                       type="file"
-                      accept="image/*, video/*"
+                      accept={postTo === "photos" ? "image/*" : "video/*"}
                       onChange={(e) => handleImageChange(e)}
                       multiple
                       style={{ display: "none" }}

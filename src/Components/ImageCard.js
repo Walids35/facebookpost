@@ -14,7 +14,8 @@ const ImageCard = ({index, image, handleImageDelete}) => {
       <div key={index} className="p-2 d-flex justify-content-between mt-2">
         <div className="d-flex">
           <Image src="three-dots-vertical.svg" className="me-3" />
-          <Image src={image.url} className="me-3" style={{ width: "50px" }} />
+          
+          {image.url.includes("mp4") ? (<></>) : (<Image src={image.url} className="me-3" style={{ width: "50px" }} />)}
           <div>
             <div className="ms-2" style={{ fontSize: "12px", width: "400px" }}>
               {image.url.slice(0, 100) + "....."}
