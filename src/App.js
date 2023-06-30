@@ -313,8 +313,6 @@ try{
     return false
   }
 
-  console.log(verifyMedias()) 
-
   return (
     <div className="p-5 bg-grey">
       <h4>Create Post</h4>
