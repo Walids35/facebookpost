@@ -4,6 +4,7 @@ import Form from "react-bootstrap/Form";
 import Card from "react-bootstrap/Card";
 import InputGroup from "react-bootstrap/InputGroup";
 import Button from "react-bootstrap/Button";
+import axios from "axios";
 
 const PostDetails = ({ postTo, postText, setPostText, textGeneration, setTextGeneration, imageGeneration, setImageGeneration, selectedImages, setSelectedImages}) => {
   function generatetext() {
@@ -33,36 +34,35 @@ const PostDetails = ({ postTo, postText, setPostText, textGeneration, setTextGen
     }
   }
 
-  function generateimage() {
+  function generateMidjourneyImage(){
     const newImage = {
-      url: '',
-      loading: true
+      url: "",
+      loading:true
     }
     setSelectedImages((prev) => [...prev, newImage])
-    fetch("https://api.openai.com/v1/images/generations", {
-      method: "POST",
+    const data = JSON.stringify({
+      "prompt": "a red knight riding a blue horse, 8k, --ar 3:2"
+    });
+
+    const config = {
+      method: 'POST',
+      maxBodyLength: Infinity,
+      url: 'https://api.midjourneyapi.io/v2/imagine',
       headers: {
-        "Content-Type": "application/json",
-        Authorization:
-          "Bearer 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",
+        'Authorization': '60058835-3747-45f8-97ec-cce064a931ee',
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        prompt: imageGeneration,
-        n: 1,
-        size: "1024x1024",
-      }),
+      data: data
+    }
+
+    axios.request(config).then((response) => {
+      console.log(JSON.stringify(response.data))
+    }).catch((error) => {
+      setSelectedImages(selectedImages.filter(e => e.url === ""))
+      console.log("error :", error)
     })
-      .then((res) => {
-        return res.json();
-      })
-      .then((data) => {
-        console.log(data.data[0].url);
-        const previousImages = [...selectedImages]
-        previousImages[previousImages.length] = {url : data.data[0].url, loading: false}
-        setSelectedImages(previousImages)
-        setImageGeneration("");
-      });
   }
+
   return (
     <Card className="mt-3">
       <Card.Body>
@@ -100,7 +100,7 @@ const PostDetails = ({ postTo, postText, setPostText, textGeneration, setTextGen
             <Button
               variant="outline-secondary"
               id="button-addon2"
-              onClick={generateimage}
+              onClick={generateMidjourneyImage}
             >
               Generate
             </Button>
