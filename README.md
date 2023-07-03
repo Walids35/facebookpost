@@ -1,4 +1,4 @@
-# Facebook Post with React and Bootstrap 
+# Advanced Single Page Web App for Seamless Social Media Posting 
 
 This project is a cutting-edge single page web application built with React, Bootstrap, and Firebase. It empowers Facebook users to effortlessly create and publish engaging posts directly from our app, leveraging the Facebook API. With the integration of state-of-the-art AI capabilities, including the ChatGPT API and the Midjourney API, this project takes social media posting to the next level by providing unique features and delightful user experiences.
 
