@@ -40,23 +40,26 @@ const PostDetails = ({ postTo, postText, setPostText, textGeneration, setTextGen
       loading:true
     }
     setSelectedImages((prev) => [...prev, newImage])
-    const data = JSON.stringify({
+    const data = ({
       "prompt": "a red knight riding a blue horse, 8k, --ar 3:2"
     });
 
     const config = {
       method: 'POST',
       maxBodyLength: Infinity,
-      url: 'https://api.midjourneyapi.io/v2/imagine',
+      url: "https://api.midjourneyapi.io/v2/imagine",
       headers: {
-        'Authorization': '60058835-3747-45f8-97ec-cce064a931ee',
-        'Content-Type': 'application/json'
+        Authorization: "60058835-3747-45f8-97ec-cce064a931ee",
+        'Content-Type': 'application/json',
       },
-      data: data
-    }
+      data: data,
+    };
 
     axios.request(config).then((response) => {
       console.log(JSON.stringify(response.data))
+      const previousImages = [...selectedImages]
+      previousImages[-1] = {url: response.data.ImageUrl, loading: false}
+      setSelectedImages(previousImages)
     }).catch((error) => {
       setSelectedImages(selectedImages.filter(e => e.url === ""))
       console.log("error :", error)
