@@ -10,11 +10,8 @@ import {
   import { storage } from "../../firebase";
 import { v4 } from "uuid";
 import ImageCard from "../ImageCard";
-import { useRef } from "react";
 
 const MediaCard = ({postTo, setSelectedImages, selectedImages, imageUpload, setImageUpload, verifyMedias}) => {
-
-  let counter = useRef(0)
 
   const uploadFile = () => {
     if (imageUpload.length > 0) {
@@ -27,13 +24,13 @@ const MediaCard = ({postTo, setSelectedImages, selectedImages, imageUpload, setI
         setSelectedImages((prev) => [...prev, newImage]);
         uploadBytes(imageRef, file)
           .then((snapshot) => {
-            console.log(snapshot);
             getDownloadURL(snapshot.ref).then((url) => {
-              const previousImages = [...selectedImages]
-              previousImages[counter] = {url : url, loading: false}
-              counter = counter + 1
-              setSelectedImages(previousImages)
-              console.log(selectedImages)
+              setSelectedImages((prev) => {
+                const index = prev.findIndex((image) => image === newImage);
+                const updatedImages = [...prev];
+                updatedImages[index] = { url: url, loading: false };
+                return updatedImages;
+              });
             });
           })
       });
