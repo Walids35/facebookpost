@@ -1,70 +1,31 @@
-# Getting Started with Create React App
+# Advanced Single Page Web App for Seamless Social Media Posting 
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project is a cutting-edge single page web application built with React, Bootstrap, and Firebase. It empowers Facebook users to effortlessly create and publish engaging posts directly from our app, leveraging the Facebook API. With the integration of state-of-the-art AI capabilities, including the ChatGPT API and the Midjourney API, this project takes social media posting to the next level by providing unique features and delightful user experiences.
 
-## Available Scripts
+## Key Features
 
-In the project directory, you can run:
+- AI-Powered Text Posts: Harnessing the power of the ChatGPT API, users can compose captivating text posts that captivate their audience, utilizing advanced natural language processing capabilities.
+  
+- AI-Generated Images: SocialPostify leverages the Midjourney API to generate stunning AI images, giving users the ability to enhance their posts with visually striking content that stands out in the crowded social media landscape.
+  
+- Post Scheduling: Users have the flexibility to schedule their posts for future publishing, ensuring optimal timing for maximum reach and engagement.
+  
+- Intuitive User Interface: The app features a sleek and responsive user interface built with Bootstrap, providing a seamless and intuitive user experience across various devices and screen sizes but also delivers a preview of the post.
 
-### `npm start`
+![Image](https://firebasestorage.googleapis.com/v0/b/postimagehandling.appspot.com/o/images%2FCapture.PNG?alt=media&token=b8c637a5-342f-413b-8e89-63c6ce5d32b8)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## How to Deploy 
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- Connect to the Facebook Graph API and generate an page access token that you will add the config file https://developers.facebook.com/tools/explorer/ with the following permissions:
 
-### `npm test`
+publish_video
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+pages_show_list
 
-### `npm run build`
+pages_read_engagement
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+pages_manage_posts
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- Launch the app: `npm start`
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
