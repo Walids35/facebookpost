@@ -41,7 +41,7 @@ const PostDetails = ({ postTo, postText, setPostText, textGeneration, setTextGen
     }
     setSelectedImages((prev) => [...prev, newImage])
     const data = ({
-      "prompt": "a red knight riding a blue horse, 8k, --ar 3:2"
+      "prompt": imageGeneration
     });
 
     const config = {
@@ -56,6 +56,7 @@ const PostDetails = ({ postTo, postText, setPostText, textGeneration, setTextGen
     };
 
     axios.request(config).then((response) => {
+      setImageGeneration("")
       console.log(JSON.stringify(response.data))
       const previousImages = [...selectedImages]
       previousImages[-1] = {url: response.data.ImageUrl, loading: false}
