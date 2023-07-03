@@ -10,13 +10,13 @@ This project is a cutting-edge single page web application built with React, Boo
   
 - Post Scheduling: Users have the flexibility to schedule their posts for future publishing, ensuring optimal timing for maximum reach and engagement.
   
-- Intuitive User Interface: The app features a sleek and responsive user interface built with Bootstrap, providing a seamless and intuitive user experience across various devices and screen sizes.
+- Intuitive User Interface: The app features a sleek and responsive user interface built with Bootstrap, providing a seamless and intuitive user experience across various devices and screen sizes but also delivers a preview of the post.
 
 ![Image](https://firebasestorage.googleapis.com/v0/b/postimagehandling.appspot.com/o/images%2FCapture.PNG?alt=media&token=b8c637a5-342f-413b-8e89-63c6ce5d32b8)
 
 ## How to Deploy 
 
-- Connect to the Facebook Graph API and generate an page access token https://developers.facebook.com/tools/explorer/ with the following permissions:
+- Connect to the Facebook Graph API and generate an page access token that you will add the config file https://developers.facebook.com/tools/explorer/ with the following permissions:
 
 publish_video
 
@@ -26,5 +26,6 @@ pages_read_engagement
 
 pages_manage_posts
 
+- Launch the app: `npm start`
 
 
